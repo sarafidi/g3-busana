@@ -1,76 +1,34 @@
-<!-- base template example -->
-
 <!DOCTYPE html>
-<html>
-
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>busana.my</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!--
-        HOW TO USE THYMELEAF TEMPLATES
-        ================================
-        - th:text="${variable}"     → display a variable from the controller
-        - th:href="@{/path}"        → generate a proper URL link
-        - th:src="@{/path}"         → generate a proper resource URL (css, js, images)
-        - th:each="item : ${list}"  → loop through a list from the controller
-        - th:if="${condition}"       → show element only if condition is true
-        - th:action="@{/path}"      → form submission URL
-
-        CSS/JS paths always start with @{/} which maps to src/main/resources/static/
-        e.g. @{/css/customer.css} → src/main/resources/static/css/customer.css
-    -->
-
-    <link rel="stylesheet" href="@{/css/customer.css}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">BUSANA.my</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 80px auto; padding: 0 1rem; }
+        h1 { font-size: 1.8rem; }
+        .success { background: #e6f4ea; color: #1a6630; padding: 12px 16px; border-radius: 8px; }
+        .info { background: #e8f0fe; color: #1a3669; padding: 12px 16px; border-radius: 8px; margin-top: 12px; }
+        nav { margin-bottom: 2rem; }
+        nav a { margin-right: 1rem; color: #333; text-decoration: none; font-weight: 500; }
+    </style>
 </head>
-
 <body>
 
-    <!-- Navbar (shared across all customer pages) -->
     <nav>
-        <a th:href="@{/}">BUSANA.my</a>
-        <a th:href="@{/products}">Shop.my</a>
-        <a th:href="@{/cart}">Cart.my</a>
-        <a th:href="@{/wishlist}">Wishlist.my</a>,
-
-        <!-- show logout if logged in, show login if not -->
-         <span th:if="${session.customer != null}">
-            <span th:text="${session.customer.name}">Customer Name</span>
-            <a th:href="@{/logout}">Logout</a>
-         </span>
-         <span th:unless="${session.customer != null}">
-            <a th:href="@{/login}">Login</a>
-            <a th:href="@{/register}">Register</a>
-         </span>
+        <a th:href="@{/}">Home</a>
+        <a th:href="@{/test}">Test</a>
     </nav>
 
-    <!-- Page content -->
-    <main>
+    <h1 th:text="${pageTitle}">BUSANA.my</h1>
 
-        <!-- e.g.: display a success or error message -->
-        <h1 th:text="${pageTitle}">Page Title</h1>
+    <p th:if="${successMessage}" class="success" th:text="${successMessage}"></p>
+    <p th:if="${errorMessage}" class="info" th:text="${errorMessage}"></p>
 
-        <!-- e.g.:display error or success message -->
-        <p th:if="${successMessage}" th:text="${successMessage}" style="color: green;"></p>
-        <p th:if="${errorMessage}" th:text="${errorMessage}" style="color: red;"></p>
+    <div class="info">
+        <strong>Stack check:</strong><br>
+        Spring Boot ✓ &nbsp;|&nbsp; Thymeleaf ✓ &nbsp;|&nbsp; MySQL ✓
+    </div>
 
-        <!-- e.g.: loop through a list of products -->
-        <div th:each="product : ${products}">
-            <h3 th:text="${product.name}">Product Name</h3>
-            <p th:text="${product.basePrice}">0.00</p>
-            <a th:href="@{/products/{id}/(id=${product.productID})}">View Details</a>
-        </div>
-
-    </main>
-
-    <footer>
-        <p>BUSANA.my &copy; 2025</p>
-    </footer>
-
-    <script th:src="@{/js/customer.js}" async defer></script>
 </body>
-
 </html>

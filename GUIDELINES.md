@@ -3,15 +3,15 @@
 ### 📋SETUP - WHAT HAS BEEN DONE
 | | Task | Details |
 | --- | --- | --- |
-|✅ | Spring Boot 4.0.6 project scaffolded with Maven | Java 26 · Tomcat on port 3306 · package `com.busana` |
-|✅ | MySQL database created · connected and verified | DB name: `busana` · MySQL 8.0.46 · all 13 tables created |
+|✅ | Spring Boot 4.0.6 project scaffolded with Maven | Java 26 · Tomcat on port 8080 · package `com.busana` |
+|✅ | MySQL database created · connected and verified | DB name: `busana`, port `3306`· MySQL 8.0.46 · all 13 tables created |
 |✅ | `application.properties` configured (not committed to GitHub) | Copy `application.properties.example` → rename to `application.properties` → fill in your own MySQL password |
 |✅ | Thymeleaf chosen as rendering approach | Controllers return HTML views · no separate frontend framework needed |
 |✅ | `Category.java` model created as example — follow this pattern for  all models | Place all models in `src/main/java/com/busana/model/` |
 |✅ | `CategoryRepository.java` created as example — follow this pattern  for all repositories | Place all repositories in `src/main/java/com/busana/repository/` |
 |✅ | Folder structure created for templates and static files | `templates/customer/` · `templates/admin/` · `templates/shared/` · `static/css/` · `static/js/` · `static/images/` |
 |✅ | `home.html` created as Thymeleaf template example | Shows how to use `th:text`, `th:href`, `th:each`, `th:if` — use as base for all pages |
-|✅ | GitHub repo set up · app builds and starts successfully | Run `./mvnw spring-boot:run` to start · visit `localhost:3306` |
+|✅ | GitHub repo set up · app builds and starts successfully | Run `./mvnw spring-boot:run` to start · visit `localhost:8080` |
 ---
 <br>
 
@@ -109,7 +109,7 @@
 
 ---
 #### 📦 Module D — Orders, promotions & notifications (Observer)
-*3 models • 3 repositories • 4 pages*
+*4 models • 4 repositories • 6 pages*
 
 #### <u >Models</u>
 📁 Order.java, OrderItem.java, Promotion.java, Notification.java
