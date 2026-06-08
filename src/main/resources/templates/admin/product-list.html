@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Catalogue Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body class="admin-shell">
+    <header class="admin-topbar">
+        <div>
+            <p class="eyebrow">Admin Panel</p>
+            <h1>Catalogue Manager</h1>
+        </div>
+        <div class="button-row">
+            <a class="button-secondary" th:href="@{/customer/products}">Customer View</a>
+            <a class="button-primary" th:href="@{/admin/products/new}">Add New Product</a>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <section class="surface-panel" th:if="${successMessage}">
+            <p class="feedback success" th:text="${successMessage}"></p>
+        </section>
+
+        <section class="surface-panel" th:if="${errorMessage}">
+            <p class="feedback error" th:text="${errorMessage}"></p>
+        </section>
+
+        <section class="catalogue-toolbar surface-panel">
+            <div class="section-heading">
+                <p class="eyebrow">Filters</p>
+                <h2>Monitor stock, status, and category</h2>
+            </div>
+
+            <form class="admin-filter-form" method="get" th:action="@{/admin/products}">
+                <label>
+                    <span>Category</span>
+                    <select name="categoryId">
+                        <option value="">All categories</option>
+                        <option
+                            th:each="category : ${categories}"
+                            th:value="${category.categoryID}"
+                            th:selected="${selectedCategoryId == category.categoryID}"
+                            th:text="${category.categoryName}">
+                        </option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>Stock availability</span>
+                    <select name="stockFilter">
+                        <option value="">All stock levels</option>
+                        <option value="in-stock" th:selected="${selectedStockFilter == 'in-stock'}">In stock</option>
+                        <option value="out-of-stock" th:selected="${selectedStockFilter == 'out-of-stock'}">Out of stock</option>
+                    </select>
+                </label>
+
+                <label>
+                    <span>Status</span>
+                    <select name="statusFilter">
+                        <option value="">All statuses</option>
+                        <option value="active" th:selected="${selectedStatusFilter == 'active'}">Active</option>
+                        <option value="inactive" th:selected="${selectedStatusFilter == 'inactive'}">Inactive</option>
+                    </select>
+                </label>
+
+                <div class="button-row">
+                    <button class="button-primary" type="submit">Apply</button>
+                    <a class="button-secondary" th:href="@{/admin/products}">Reset</a>
+                </div>
+            </form>
+        </section>
+
+        <section class="empty-state surface-panel" th:if="${products.isEmpty()}">
+            <h2>No products yet</h2>
+            <p>Create the first product item to make the customer catalogue visible.</p>
+            <a class="button-primary" th:href="@{/admin/products/new}">Create Product</a>
+        </section>
+
+        <section class="admin-product-grid" th:unless="${products.isEmpty()}">
+            <article class="admin-product-card surface-panel" th:each="product : ${products}">
+                <div class="admin-card-head">
+                    <div>
+                        <p class="eyebrow" th:text="${product.productID}">PRD001</p>
+                        <h2 th:text="${product.name}">Product Name</h2>
+                    </div>
+
+                    <div class="card-badges">
+                        <span class="badge badge-soft" th:text="${product.categoryName}">Tops</span>
+                        <span class="badge" th:classappend="${product.status == 'active'} ? ' badge-success' : ' badge-muted'"
+                            th:text="${product.status == 'active'} ? 'Active' : 'Inactive'">
+                            Active
+                        </span>
+                    </div>
+                </div>
+
+                <p class="muted-text" th:text="${product.description}">Description</p>
+
+                <dl class="admin-specs">
+                    <div>
+                        <dt>Price</dt>
+                        <dd th:text="|RM ${#numbers.formatDecimal(product.basePrice, 1, 'COMMA', 2, 'POINT')}|">RM 0.00</dd>
+                    </div>
+                    <div>
+                        <dt>Fabric</dt>
+                        <dd th:text="${product.fabricType}">Cotton</dd>
+                    </div>
+                    <div>
+                        <dt>Total stock</dt>
+                        <dd th:text="${product.totalStock}">0</dd>
+                    </div>
+                </dl>
+
+                <div class="variant-pill-row">
+                    <span class="variant-pill" th:each="variant : ${product.variants}"
+                        th:text="|${variant.variantLabel} · ${variant.stockLevel}|">
+                        Black / M · 8
+                    </span>
+                </div>
+
+                <div class="button-row">
+                    <a class="button-primary" th:href="@{/admin/products/{productId}/edit(productId=${product.productID})}">Edit Product</a>
+                    <a class="button-secondary" th:href="@{/admin/products/{productId}/edit(productId=${product.productID},focus='stock')}">Update Stock</a>
+                    <form method="post" th:action="@{/admin/products/{productId}/delete(productId=${product.productID})}"
+                        onsubmit="return confirm('Delete this product permanently?');">
+                        <button class="button-danger" type="submit">Delete</button>
+                    </form>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

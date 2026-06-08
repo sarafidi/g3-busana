@@ -31,7 +31,7 @@ public class Category {
     @Column(name = "categoryID", length = 20, nullable = false)
     private String categoryID;
     
-    @Column(name = "categoryName", length = 20, nullable = false)
+    @Column(name = "categoryName", length = 100, nullable = false)
     private String categoryName;
     
     @Column(name = "description", length = 255)     // nullable = true by default
