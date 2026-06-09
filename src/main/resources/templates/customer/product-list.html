@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Product Catalogue</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/customer.css}">
+</head>
+<body class="customer-shell">
+    <header class="customer-topbar">
+        <a class="brand-mark" th:href="@{/}">BUSANA.my</a>
+        <nav class="topbar-links">
+            <a th:href="@{/}">Home</a>
+            <a class="is-active" th:href="@{/customer/products}">Catalogue</a>
+            <a th:href="@{/admin/products}">Admin View</a>
+        </nav>
+    </header>
+
+    <main class="catalogue-main">
+        <section class="hero-card">
+            <p class="eyebrow">Module B · Product Catalogue</p>
+            <h1>Style discovery with search, category filters, and live variant visibility.</h1>
+            <p class="hero-copy">
+                Browse BUSANA.my by keyword, category, size, colour, and price range just like the assignment PDF describes.
+            </p>
+        </section>
+
+        <section class="surface-panel" th:if="${successMessage}">
+            <p class="feedback success" th:text="${successMessage}"></p>
+        </section>
+
+        <section class="surface-panel" th:if="${errorMessage}">
+            <p class="feedback error" th:text="${errorMessage}"></p>
+        </section>
+
+        <section class="catalogue-layout">
+            <aside class="surface-panel filter-panel">
+                <div class="section-heading">
+                    <p class="eyebrow">Search Menu</p>
+                    <h2>Refine the catalogue</h2>
+                </div>
+
+                <form class="filter-form" method="get" th:action="@{/customer/products}">
+                    <label>
+                        <span>Keyword</span>
+                        <input type="text" name="search" th:value="${search}" placeholder="Search by product name or description">
+                    </label>
+
+                    <label>
+                        <span>Category</span>
+                        <select name="categoryId">
+                            <option value="">All categories</option>
+                            <option
+                                th:each="category : ${categories}"
+                                th:value="${category.categoryID}"
+                                th:selected="${selectedCategoryId == category.categoryID}"
+                                th:text="${category.categoryName}">
+                            </option>
+                        </select>
+                    </label>
+
+                    <label>
+                        <span>Size</span>
+                        <select name="size">
+                            <option value="">Any size</option>
+                            <option
+                                th:each="catalogueSize : ${sizes}"
+                                th:value="${catalogueSize}"
+                                th:selected="${selectedSize == catalogueSize}"
+                                th:text="${catalogueSize}">
+                            </option>
+                        </select>
+                    </label>
+
+                    <label>
+                        <span>Colour</span>
+                        <select name="colour">
+                            <option value="">Any colour</option>
+                            <option
+                                th:each="catalogueColour : ${colours}"
+                                th:value="${catalogueColour}"
+                                th:selected="${selectedColour == catalogueColour}"
+                                th:text="${catalogueColour}">
+                            </option>
+                        </select>
+                    </label>
+
+                    <div class="field-row">
+                        <label>
+                            <span>Min price</span>
+                            <input type="number" min="0" step="0.01" name="minPrice" th:value="${minPrice}" placeholder="0.00">
+                        </label>
+
+                        <label>
+                            <span>Max price</span>
+                            <input type="number" min="0" step="0.01" name="maxPrice" th:value="${maxPrice}" placeholder="999.99">
+                        </label>
+                    </div>
+
+                    <div class="button-row">
+                        <button class="button-primary" type="submit">Apply Filters</button>
+                        <a class="button-secondary" th:href="@{/customer/products}">Clear</a>
+                    </div>
+                </form>
+            </aside>
+
+            <section class="results-panel">
+                <div class="results-header">
+                    <div>
+                        <p class="eyebrow">Customer Catalogue</p>
+                        <h2>Available products</h2>
+                    </div>
+                    <p class="results-count" th:text="|${products.size()} curated pieces|">0 curated pieces</p>
+                </div>
+
+                <div class="empty-state surface-panel" th:if="${products.isEmpty()}">
+                    <h3>No products found</h3>
+                    <p th:text="${emptyMessage}"></p>
+                </div>
+
+                <div class="product-grid" th:unless="${products.isEmpty()}">
+                    <article class="product-card" th:each="product : ${products}">
+                        <div class="product-card-media">
+                            <img
+                                th:if="${product.primaryImage != ''}"
+                                th:src="${product.primaryImage}"
+                                th:alt="${product.name}">
+                            <div class="image-fallback" th:if="${product.primaryImage == ''}">
+                                <span>BUSANA</span>
+                            </div>
+                        </div>
+
+                        <div class="product-card-content">
+                            <div class="card-badges">
+                                <span class="badge badge-soft" th:text="${product.categoryName}">Tops</span>
+                                <span class="badge" th:classappend="${product.inStock} ? ' badge-success' : ' badge-muted'"
+                                    th:text="${product.inStock} ? 'In Stock' : 'Out of Stock'">
+                                    In Stock
+                                </span>
+                            </div>
+
+                            <div class="card-copy">
+                                <h3 th:text="${product.name}">Product Name</h3>
+                                <p class="muted-text" th:text="${product.description}">Product description</p>
+                            </div>
+
+                            <div class="card-meta">
+                                <p class="price-tag" th:text="|RM ${#numbers.formatDecimal(product.basePrice, 1, 'COMMA', 2, 'POINT')}|">RM 0.00</p>
+                                <p class="variant-line" th:text="${product.variantSummary}">Black / M, White / L</p>
+                                <p class="helper-line" th:text="|Fabric: ${product.fabricType} · Total stock: ${product.totalStock}|">Fabric: Cotton · Total stock: 12</p>
+                            </div>
+
+                            <a class="button-primary" th:href="@{/customer/products/{productId}(productId=${product.productID})}">
+                                View Details
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </section>
+    </main>
+</body>
+</html>

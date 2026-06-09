@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Product Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/customer.css}">
+    <script defer th:src="@{/js/customer.js}"></script>
+</head>
+<body class="customer-shell">
+    <header class="customer-topbar">
+        <a class="brand-mark" th:href="@{/}">BUSANA.my</a>
+        <nav class="topbar-links">
+            <a th:href="@{/customer/products}">Back to Catalogue</a>
+            <a th:href="@{/admin/products}">Admin View</a>
+        </nav>
+    </header>
+
+    <main class="detail-main" th:if="${product != null}">
+        <section class="detail-layout">
+            <div class="surface-panel detail-gallery">
+                <div class="detail-hero-media">
+                    <img
+                        th:if="${product.primaryImage != ''}"
+                        th:src="${product.primaryImage}"
+                        th:alt="${product.name}">
+                    <div class="image-fallback detail-fallback" th:if="${product.primaryImage == ''}">
+                        <span th:text="${product.categoryName}">Category</span>
+                    </div>
+                </div>
+
+                <div class="thumbnail-strip" th:if="${!product.imageList.isEmpty()}">
+                    <img
+                        th:each="image : ${product.imageList}"
+                        th:src="${image}"
+                        th:alt="${product.name}">
+                </div>
+            </div>
+
+            <div class="surface-panel detail-summary">
+                <div class="card-badges">
+                    <span class="badge badge-soft" th:text="${product.categoryName}">Tops</span>
+                    <span class="badge" th:classappend="${product.inStock} ? ' badge-success' : ' badge-muted'"
+                        th:text="${product.inStock} ? 'Ready to shop' : 'Currently unavailable'">
+                        Ready to shop
+                    </span>
+                </div>
+
+                <h1 th:text="${product.name}">Product Name</h1>
+                <p class="detail-price" th:text="|RM ${#numbers.formatDecimal(product.basePrice, 1, 'COMMA', 2, 'POINT')}|">RM 0.00</p>
+                <p class="detail-copy" th:text="${product.description}">Product description</p>
+
+                <dl class="detail-specs">
+                    <div>
+                        <dt>Fabric</dt>
+                        <dd th:text="${product.fabricType}">Cotton</dd>
+                    </div>
+                    <div>
+                        <dt>Total stock</dt>
+                        <dd th:text="${product.totalStock}">0</dd>
+                    </div>
+                    <div>
+                        <dt>Available sizes</dt>
+                        <dd th:text="${product.availableSizesText}">S, M, L</dd>
+                    </div>
+                    <div>
+                        <dt>Available colours</dt>
+                        <dd th:text="${product.availableColoursText}">Black, White</dd>
+                    </div>
+                </dl>
+
+                <section class="variant-section surface-inset" id="variant-section">
+                    <div class="section-heading">
+                        <p class="eyebrow">Product Variants</p>
+                        <h2>Pick a size and colour combination</h2>
+                    </div>
+
+                    <div class="variant-grid" data-variant-picker>
+                        <label
+                            class="variant-tile"
+                            th:each="variant, variantStat : ${product.variants}"
+                            th:classappend="${!variant.available} ? ' is-disabled' : ''">
+                            <input
+                                type="radio"
+                                name="selectedVariant"
+                                th:value="${variant.variantID}"
+                                th:disabled="${!variant.available}"
+                                th:checked="${variantStat.index == 0 && variant.available}"
+                                th:attr="data-variant-label=${variant.variantLabel},data-stock-level=${variant.stockLevel}">
+                            <span class="variant-topline" th:text="${variant.variantLabel}">Black / M</span>
+                            <span class="variant-stock" th:text="${variant.available} ? |${variant.stockLevel} left| : 'Out of stock'">12 left</span>
+                        </label>
+                    </div>
+
+                    <div class="variant-status">
+                        <p class="eyebrow">Selected Variant</p>
+                        <h3 data-selected-variant>Choose an available option</h3>
+                        <p class="helper-line" data-selected-stock>Stock visibility updates here.</p>
+                    </div>
+                </section>
+
+                <div class="surface-inset callout-panel">
+                    <h3>Cart hand-off</h3>
+                    <p>
+                        The product detail page already exposes size, colour, and stock data.
+                        Cart and checkout submission will connect cleanly once Module C is merged.
+                    </p>
+                    <button class="button-secondary" type="button" disabled>Add to Cart in Module C</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="surface-panel related-panel" th:if="${!relatedProducts.isEmpty()}">
+            <div class="section-heading">
+                <p class="eyebrow">Same Category</p>
+                <h2>Continue browsing</h2>
+            </div>
+
+            <div class="related-grid">
+                <a class="related-card" th:each="related : ${relatedProducts}"
+                    th:href="@{/customer/products/{productId}(productId=${related.productID})}">
+                    <div class="image-fallback small-fallback" th:if="${related.primaryImage == ''}">
+                        <span th:text="${related.categoryName}">Category</span>
+                    </div>
+                    <img th:if="${related.primaryImage != ''}" th:src="${related.primaryImage}" th:alt="${related.name}">
+                    <div>
+                        <h3 th:text="${related.name}">Product Name</h3>
+                        <p th:text="|RM ${#numbers.formatDecimal(related.basePrice, 1, 'COMMA', 2, 'POINT')}|">RM 0.00</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
