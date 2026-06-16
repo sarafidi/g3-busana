@@ -38,7 +38,7 @@ public class PromotionService {
 
     // Admin gets promotion by ID
     public Promotion getPromotionByID(String promotionID) {
-       return promotionRepository.findById(promotionID.trim()).orElseThrow(() -> new RuntimeException("Order not found with ID: " + promotionID)); //trim removes whitespace
+       return promotionRepository.findById(promotionID.trim()).orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + promotionID)); //trim removes whitespace
 
     };
     

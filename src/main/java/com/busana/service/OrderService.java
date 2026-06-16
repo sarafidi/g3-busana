@@ -48,7 +48,7 @@ public class OrderService {
 
     // View orders by ID
     public Order getOrderByOrderID(String orderID) {
-       return orderRepository.findById(orderID.trim()).orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderID)); //trim removes whitespace
+       return orderRepository.findById(orderID.trim()).orElseThrow(() -> new IllegalArgumentException("Order not found with ID: " + orderID)); //trim removes whitespace
        
     }
 
