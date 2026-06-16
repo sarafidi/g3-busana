@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login | BUSANA.my</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f7fb; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { width: 100%; max-width: 420px; background: #ffffff; border-radius: 16px; box-shadow: 0 18px 50px rgba(0,0,0,0.08); padding: 32px; }
+        h1 { margin: 0 0 24px; font-size: 1.75rem; color: #1d3557; }
+        .field { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #2f3e55; }
+        input { width: 100%; padding: 12px 14px; border: 1px solid #cbd5e0; border-radius: 10px; font-size: 1rem; color: #2c3a50; }
+        input:focus { outline: none; border-color: #556ee6; box-shadow: 0 0 0 3px rgba(85, 110, 230, 0.12); }
+        .button { width: 100%; padding: 14px 16px; border: none; border-radius: 10px; background: #556ee6; color: #ffffff; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .button:hover { background: #3e57c0; }
+        .message { margin-bottom: 16px; padding: 14px 16px; border-radius: 12px; }
+        .error { background: #ffe3e3; color: #9b1d1d; border: 1px solid #f2c2c2; }
+        .link-row { margin-top: 18px; text-align: center; font-size: 0.95rem; }
+        .link-row a { color: #556ee6; text-decoration: none; }
+        .link-row a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>Customer Login</h1>
+
+        <div th:if="${error}" class="message error" th:text="${error}"></div>
+
+        <form th:action="@{/customer/login}" method="post">
+            <div class="field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required />
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required />
+            </div>
+            <button type="submit" class="button">Sign in</button>
+        </form>
+
+        <div class="link-row">
+            <span>Don't have an account? </span><a th:href="@{/customer/register}">Register</a>
+        </div>
+    </div>
+</body>
+</html>
