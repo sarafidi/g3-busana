@@ -3,9 +3,12 @@ package com.busana.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.busana.model.Order;
 
 import java.util.ArrayList;
+@Component
 public class OrderManager implements OrderSubject {
     
     private List <OrderObserver> observers = new ArrayList<>();
