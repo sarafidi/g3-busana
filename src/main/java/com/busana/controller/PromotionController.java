@@ -60,7 +60,7 @@ public class PromotionController {
         }
     }
 
-    @PostMapping("/admin/promotion")
+    @PostMapping("/admin/promotions")
     public String savePromotion(
         @ModelAttribute("promotion") Promotion promotion,
         RedirectAttributes redirectAttributes
