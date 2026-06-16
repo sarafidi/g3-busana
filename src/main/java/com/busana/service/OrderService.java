@@ -46,10 +46,8 @@ public class OrderService {
             .toList();
     }
 
-    // View Orders by Admin
     // View orders by ID
-
-        public Order getOrderByOrderID(String orderID) {
+    public Order getOrderByOrderID(String orderID) {
        return orderRepository.findById(orderID.trim()).orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderID)); //trim removes whitespace
        
     }
