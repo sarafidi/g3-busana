@@ -122,7 +122,7 @@
                     <td th:text="${order.promotion.promotionName}"></td>
                     <td th:text="${order.promotion.discountType}"></td> 
                     <td th:text="${order.promotion.discountValue}"></td> 
-                    <td><a class="action-button" th:href="@{/admin/promotions/{promotionId}/edit}">Edit</a></td>                                          
+                    <td><a class="action-button" th:href="@{/admin/promotions/{id}/edit(id=${order.promotion.promotionID})}">Edit</a></td>                                          
                             </tr>
                     </tbody>
                 </table>
