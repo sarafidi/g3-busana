@@ -15,11 +15,14 @@ import com.busana.repository.OrderRepository;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderManager orderManager;
+    //private final EmailNotificationObserver emailObserver;
 
     //Constructor 
-    public OrderService(OrderRepository orderRepository, OrderManager orderManager) {
+    public OrderService(OrderRepository orderRepository, OrderManager orderManager, EmailNotificationObserver emailObserver) {
             this.orderRepository = orderRepository;
             this.orderManager = orderManager;
+            //this.emailObserver = emailObserver;
+          // orderManager.addObserver(emailObserver);
     }
 
     // View Orders by Admin

@@ -3,6 +3,7 @@ package com.busana.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.busana.model.Order;
@@ -16,6 +17,9 @@ public class OrderManager implements OrderSubject {
     @Override
     public void addObserver(OrderObserver observer) {
         observers.add(observer);        
+    }
+    public OrderManager(List<OrderObserver> observers) {
+        this.observers = observers;
     }
     @Override
     public void removeObeserver(OrderObserver observer) {
