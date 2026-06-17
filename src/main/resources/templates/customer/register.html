@@ -30,10 +30,10 @@
         <div th:if="${error}" class="message error" th:text="${error}"></div>
 
         <form th:action="@{/customer/register}" th:object="${customer}" method="post">
-            <div class="field">
+            <!-- <div class="field">
                 <label for="customerID">Customer ID</label>
                 <input type="text" id="customerID" th:field="*{customerID}" placeholder="Enter your customer ID" />
-            </div>
+            </div> -->
             <div class="field">
                 <label for="name">Full Name</label>
                 <input type="text" id="name" th:field="*{name}" placeholder="John Doe" required />
