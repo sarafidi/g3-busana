@@ -13,48 +13,50 @@
     <header class="admin-topbar">
         <div>
             <p class="eyebrow">Admin Panel</p>
-            <h1>Order Managenment</h1>
-        </div>
-        <div class="button-row">
-            <!-- <a class="button-secondary" th:href="@{/admin/orders}">Customer View</a> -->
-            <!-- <a class="button-primary" th:href="@{/admin/products/new}">Add New Product</a> -->
+            <h1>Order List</h1>
         </div>
     </header>
 
     <main class="admin-main">
-        <section class="surface-panel" th:if="${successMessage}">
+        <!-- <section class="surface-panel" th:if="${successMessage}">
             <p class="feedback success" th:text="${successMessage}"></p>
-        </section>
+        </section> -->
 
-        <section class="surface-panel" th:if="${errorMessage}">
+        <!-- <section class="surface-panel" th:if="${errorMessage}">
             <p class="feedback error" th:text="${errorMessage}"></p>
-        </section>
+        </section> -->
 
         <section class="catalogue-toolbar surface-panel">
             <div class="section-heading">
                 <!-- <p class="eyebrow">Filters</p> -->
                 <h2>View and manage orders</h2>
             </div>
-
-                <table style="width:100%">
+            <div class="table-container">
+                <table style="width:100%" >
+                <thead>
                 <tr>
                     <th>Order No</th>
-                    <th>Order Date</th>
-                    <th>Order Status</th>
                     <th>Customer ID</th>
+                    <th>Customer Name</th>
+                    <th>Order Date</th>
+                    <th>Total Amount</th>
+                    <th>Order Status</th>
+                    <th>Action</th>
                 </tr>
+                </thead>
+                <tbody>
                 <tr th:each="order: ${orders}">
-                    <td th:text="${order.orderID}" ></td>   
-                    <td th:text="${order.orderDate}" ></td>                    
-                    <td th:text="${order.orderStatus}" ></td>                    
+                    <td th:text="${order.orderID}" ></td> 
                     <td th:text="${order.customer.customerID}" ></td>                    
-                 
+                    <td th:text="${order.customer.name}" ></td>                    
+                    <td th:text="${#temporals.format(order.orderDate, 'dd MMMM yyyy')}"></td>
+                    <td th:text="'RM ' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="${order.orderStatus}" ></td>                     
+                    <td><a class="action-button" th:href="@{'/admin/orders/' + ${order.orderID}}">View</a></td>                                          
                 </tr>
+                </tbody>
                 </table>
-
-
-                </div>
-            </article>
+            </div>
         </section>
     </main>
 </body>
