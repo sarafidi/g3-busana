@@ -83,6 +83,11 @@ public class OrderController {
         }
     }
 
+@GetMapping("/test")
+public String testOrderStatusUpdate() {
+    orderService.updateOrderStatus("ORD001", "Cats");
+    return "redirect:/admin/orders"; 
+}
 
 }
 
