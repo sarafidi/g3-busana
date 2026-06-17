@@ -60,7 +60,7 @@ public class AuthController {
         return "redirect:/customer/login";
     }
 
-    //customer logout
+    //customer logout --need fix later
     @GetMapping("/logout")
     public String logoutCustomer(HttpSession session) {
         session.invalidate();
@@ -94,17 +94,22 @@ public class AuthController {
         Admin admin = authService.loginAdmin(email, password);
         if (admin != null) {
             session.setAttribute("admin", admin);
-            return "admin/dashboard";
+            return "redirect:/admin/dashboard";
         }
         model.addAttribute("error", "Invalid email or password");
         return "admin/login";
+    }
+
+    @GetMapping("/admin/dashboard")
+    public String adminDashboard() {
+        return "admin/dashboard";
     }
 
     //admin logout
     @GetMapping("/admin/logout")    
     public String logoutAdmin(HttpSession session) {
         session.invalidate();
-        return "admin/login";
+        return "redirect:/admin/login";
     }
 
 }
