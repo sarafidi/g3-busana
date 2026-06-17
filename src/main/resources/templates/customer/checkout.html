@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base2}"
+      lang="en">
+<head>
+    <title>Checkout | BUSANA.my</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main layout:fragment="content" class="max-w-4xl mx-auto py-8 px-4">
+        <!-- Page heading -->
+        <div class="mb-8 border-b border-stone-200 pb-4">
+            <h1 class="text-3xl font-['Prata'] serif font-normal text-[#2d201a]">Checkout</h1>
+            <p class="mt-2 text-sm text-[#6e5a4e]">Review your order and select your shipping method</p>
+        </div>
+
+        <!-- Error message -->
+        <div th:if="${error}" class="mb-6 p-4 rounded-xl bg-red-50 text-red-700 text-sm border border-red-200" th:text="${error}"></div>
+
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <!-- Left Panel: Cart items summary & Delivery info -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- Cart items list -->
+                <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm space-y-4">
+                    <h2 class="text-sm font-semibold tracking-wider text-[#2d201a] uppercase mb-4">Items Summary</h2>
+                    <div th:each="item : ${cartItems}" class="flex items-center gap-4 py-3 border-b border-stone-100 last:border-b-0">
+                        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-stone-100 overflow-hidden">
+                            <img th:if="${item.variant?.product?.images != null and item.variant.product.images != ''}"
+                                 th:src="${item.variant.product.images}"
+                                 th:alt="${item.variant.product.name}"
+                                 class="w-full h-full object-cover" />
+                            <div th:unless="${item.variant?.product?.images != null and item.variant.product.images != ''}" 
+                                 class="w-full h-full flex items-center justify-center bg-stone-200 text-stone-500 font-semibold text-xs">
+                                BUSANA
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-stone-900 truncate" th:text="${item.variant?.product?.name}">Product Name</p>
+                            <p class="text-xs text-stone-500">
+                                Qty: <span th:text="${item.quantity}">1</span> &middot; Size: <span th:text="${item.variant?.size}">M</span>
+                            </p>
+                        </div>
+                        <p class="text-sm font-semibold text-stone-950">
+                            RM <span th:text="${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <form th:action="@{/checkout}" method="post" id="checkoutForm" class="space-y-6">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    
+                    <!-- Delivery Address -->
+                    <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                        <h2 class="text-sm font-semibold tracking-wider text-[#2d201a] uppercase mb-4 font-['Prata']">1. Delivery Address</h2>
+                        <div class="space-y-2">
+                            <label for="deliveryAddress" class="block text-xs font-medium text-stone-600">Enter your full shipping address</label>
+                            <input type="text" id="deliveryAddress" name="deliveryAddress" th:value="${param.address}" placeholder="123 Street Name, Kuala Lumpur" required
+                                   class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition-all" />
+                        </div>
+                    </div>
+
+                    <!-- Shipping Method Selection (Triggering Strategy Pattern) -->
+                    <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                        <h2 class="text-sm font-semibold tracking-wider text-[#2d201a] uppercase mb-4 font-['Prata']">2. Shipping Method</h2>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Standard Shipping Option -->
+                            <label class="relative flex flex-col p-4 rounded-xl border cursor-pointer select-none transition-all duration-150"
+                                   th:classappend="${shippingMethod == 'standard' ? 'border-amber-500 bg-amber-50/20 ring-1 ring-amber-500' : 'border-stone-200 hover:border-stone-300'}">
+                                <input type="radio" name="shippingMethod" value="standard" class="sr-only" 
+                                       th:checked="${shippingMethod == 'standard'}"
+                                       onchange="updateShippingMethod(this.value)" />
+                                <span class="block text-sm font-semibold text-stone-900">Standard Shipping</span>
+                                <span class="block text-xs text-stone-500 mt-1">3 - 5 business days</span>
+                                <span class="block text-sm font-bold text-amber-700 mt-3">RM 5.00</span>
+                            </label>
+
+                            <!-- Express Shipping Option -->
+                            <label class="relative flex flex-col p-4 rounded-xl border cursor-pointer select-none transition-all duration-150"
+                                   th:classappend="${shippingMethod == 'express' ? 'border-amber-500 bg-amber-50/20 ring-1 ring-amber-500' : 'border-stone-200 hover:border-stone-300'}">
+                                <input type="radio" name="shippingMethod" value="express" class="sr-only" 
+                                       th:checked="${shippingMethod == 'express'}"
+                                       onchange="updateShippingMethod(this.value)" />
+                                <span class="block text-sm font-semibold text-stone-900">Express Shipping</span>
+                                <span class="block text-xs text-stone-500 mt-1">1 - 2 business days</span>
+                                <span class="block text-sm font-bold text-amber-700 mt-3">RM 15.00</span>
+                            </label>
+
+                            <!-- Same-Day Shipping Option -->
+                            <label class="relative flex flex-col p-4 rounded-xl border cursor-pointer select-none transition-all duration-150"
+                                   th:classappend="${shippingMethod == 'sameday' ? 'border-amber-500 bg-amber-50/20 ring-1 ring-amber-500' : 'border-stone-200 hover:border-stone-300'}">
+                                <input type="radio" name="shippingMethod" value="sameday" class="sr-only" 
+                                       th:checked="${shippingMethod == 'sameday'}"
+                                       onchange="updateShippingMethod(this.value)" />
+                                <span class="block text-sm font-semibold text-stone-900">Same-Day Courier</span>
+                                <span class="block text-xs text-stone-500 mt-1">Delivered today</span>
+                                <span class="block text-sm font-bold text-amber-700 mt-3">RM 30.00</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Panel: Order Summary sidebar -->
+            <div class="space-y-6">
+                <div class="rounded-2xl border border-stone-200 bg-stone-50/50 p-6 sticky top-8 shadow-sm">
+                    <h2 class="mb-4 text-sm font-semibold tracking-wider text-[#2d201a] uppercase font-['Prata']">Payment Details</h2>
+                    
+                    <div class="space-y-3 text-sm text-stone-600 mb-6 border-b border-stone-200 pb-4">
+                        <div class="flex justify-between">
+                            <span>Subtotal</span>
+                            <span class="font-medium text-stone-900">RM <span th:text="${#numbers.formatDecimal(subtotal, 1, 'COMMA', 2, 'POINT')}">0.00</span></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Shipping Fee</span>
+                            <span class="font-medium text-stone-900" th:text="${shippingFee > 0 ? 'RM ' + #numbers.formatDecimal(shippingFee, 1, 'COMMA', 2, 'POINT') : 'Free'}">0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between text-base font-bold text-stone-900 mb-6">
+                        <span>Total Pay</span>
+                        <span class="text-amber-800 text-lg">RM <span th:text="${#numbers.formatDecimal(totalAmount, 1, 'COMMA', 2, 'POINT')}">0.00</span></span>
+                    </div>
+
+                    <button type="submit" form="checkoutForm" 
+                            class="block w-full rounded-full bg-[#b4572d] py-3 text-center text-sm font-semibold text-white shadow-lg hover:bg-[#8f3c1c] transition-colors duration-150">
+                        Place Order &amp; Pay
+                    </button>
+                    
+                    <a th:href="@{/cart}" class="mt-4 block w-full text-center text-xs text-stone-500 hover:text-stone-900 transition-colors">
+                        &larr; Return to Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function updateShippingMethod(method) {
+                const addressVal = document.getElementById('deliveryAddress').value;
+                const encodedAddress = encodeURIComponent(addressVal);
+                window.location.href = '/checkout?shippingMethod=' + method + '&address=' + encodedAddress;
+            }
+        </script>
+    </main>
+</body>
+</html>

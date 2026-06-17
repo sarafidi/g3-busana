@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title th:text="${pageTitle}">BUSANA.my</title>
+</head>
+
+<body class="min-h-screen flex flex-col bg-gray-50">
+    <header th:replace="fragments/navbar :: navbar"></header>
+
+    <!-- This is the fragment placeholder -->
+    <main class="flex-1" th:fragment="content">
+        <!-- Child pages will insert content here -->
+    </main>
+
+    <footer class="text-center py-6 text-gray-500 text-sm">
+        BUSANA.my © 2025
+    </footer>
+</body>
+</html>

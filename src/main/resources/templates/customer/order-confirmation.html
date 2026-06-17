@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/base}"
+      lang="en">
+<head>
+    <title>Order Confirmed | BUSANA.my</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main layout:fragment="content" class="max-w-2xl mx-auto py-12 px-4">
+        <!-- Success State Card -->
+        <div class="bg-white rounded-3xl border border-stone-200 p-8 md:p-10 shadow-xl text-center space-y-6">
+            <!-- Animated Green Checkmark -->
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
+                <svg class="h-8 w-8 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-xs font-semibold tracking-wider text-emerald-600 uppercase">Order Confirmed</p>
+                <h1 class="text-3xl font-['Prata'] serif font-normal text-stone-900">Thank you for your purchase!</h1>
+                <p class="text-sm text-stone-500">Your order has been received and is being processed.</p>
+            </div>
+
+            <!-- Receipt Detail Box -->
+            <div class="bg-stone-50 rounded-2xl p-6 text-left border border-stone-100 space-y-4">
+                <h2 class="text-xs font-bold tracking-wider text-stone-400 uppercase border-b border-stone-200 pb-2">Receipt Details</h2>
+                
+                <div class="space-y-2 text-sm text-stone-700">
+                    <div class="flex justify-between">
+                        <span class="text-stone-400">Delivery Address:</span>
+                        <span class="font-medium text-stone-900 text-right max-w-xs truncate" 
+                              th:text="${deliveryAddress ?: 'Not Specified'}">123 Street Name, Kuala Lumpur</span>
+                    </div>
+                    
+                    <div class="flex justify-between">
+                        <span class="text-stone-400">Shipping Method:</span>
+                        <span class="font-medium text-stone-900 capitalize" 
+                              th:text="${shippingMethod ?: 'Standard'}">Standard</span>
+                    </div>
+
+                    <div class="flex justify-between border-t border-stone-200/50 pt-2 mt-2">
+                        <span class="text-stone-400">Cart Subtotal:</span>
+                        <span class="font-medium text-stone-900">RM <span th:text="${subtotal != null ? #numbers.formatDecimal(subtotal, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</span></span>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <span class="text-stone-400">Shipping Fee:</span>
+                        <span class="font-medium text-stone-900">RM <span th:text="${shippingFee != null ? #numbers.formatDecimal(shippingFee, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</span></span>
+                    </div>
+
+                    <div class="flex justify-between border-t border-stone-200 pt-3 text-base font-bold text-stone-900">
+                        <span>Total Paid:</span>
+                        <span class="text-amber-800">RM <span th:text="${totalAmount != null ? #numbers.formatDecimal(totalAmount, 1, 'COMMA', 2, 'POINT') : '0.00'}">0.00</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Catalog button -->
+            <div class="pt-4">
+                <a th:href="@{/customer/products}" 
+                   class="inline-block rounded-full bg-[#b4572d] px-8 py-3 text-sm font-semibold text-white shadow-md hover:bg-[#8f3c1c] transition-colors duration-150">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

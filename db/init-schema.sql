@@ -162,6 +162,12 @@ CREATE TABLE Notification (
     Foreign Key (customerID) REFERENCES Customer(customerID) ON DELETE CASCADE
 );
 
+# Add wishlistID as FK into wishlistItem table
 ALTER TABLE WishlistItem ADD COLUMN wishlistID VARCHAR(20) NOT NULL;
 ALTER TABLE WishlistItem ADD FOREIGN KEY (wishlistID)
     REFERENCES Wishlist(wishlistID) ON DELETE CASCADE;
+
+
+# Change Customer and Admin table -> password properties
+ALTER TABLE Customer MODIFY password VARCHAR(255) NOT NULL;
+ALTER TABLE Admin MODIFY password VARCHAR(255) NOT NULL;

@@ -67,7 +67,9 @@ public class Product {
     public void setFabricType(String fabricType) { this.fabricType = fabricType; }
 
     public String getImages() { return images; }
-    public void setImages(String images) { this.images = images; }
+    public void setImages(String images) {
+        this.images = images;
+    }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

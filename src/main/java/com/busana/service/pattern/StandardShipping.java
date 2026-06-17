@@ -4,7 +4,7 @@ package com.busana.service.pattern;
 // weight column currently not in DB scope
 public class StandardShipping implements ShippingStrategy {
     @Override
-    public double calculateShippingFee(Order order) {
+    public double calculateShippingFee() {
         return 5.00;
     }
 }

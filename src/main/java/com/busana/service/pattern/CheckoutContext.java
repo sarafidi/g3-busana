@@ -11,8 +11,8 @@ public class CheckoutContext {
 
     public void setPricingStrategy(PricingStrategy pricingStrategy) { this.pricingStrategy = pricingStrategy; }
 
-    public double executeShipping(Order order) {
-        return shippingStrategy.calculateShippingFee(order);
+    public double executeShipping() {
+        return shippingStrategy.calculateShippingFee();
     }
 
     public double executePrice(double basePrice) {

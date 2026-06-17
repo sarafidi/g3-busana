@@ -16,7 +16,7 @@ public class ShoppingCart {
     // required by JPA to reconstruct obj from DB rows
     public ShoppingCart() { }
 
-    public ShoppingCart(String cartID, Category customer) {
+    public ShoppingCart(String cartID, Customer customer) {
         this.cartID = cartID;
         this.customer = customer;
     }

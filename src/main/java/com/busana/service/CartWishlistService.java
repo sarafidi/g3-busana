@@ -2,6 +2,7 @@ package com.busana.service;
 
 import com.busana.model.*;
 import com.busana.repository.*;
+import com.busana.service.pattern.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,8 @@ import java.util.Optional;
 
 @Service
 public class CartWishlistService {
+    @Autowired
+    private CheckoutContext checkoutContext;
     /*
         Exception checks:
         1. is customer logged in?       -> check session in controller, not service
@@ -220,4 +223,42 @@ public class CartWishlistService {
         // step 3: return all items in the wishlist if wishlist exists
         return wishlistItemRepository.findByWishlist_WishlistID(wishlist.get().getWishlistID());
     }
+
+    public void clearCart(String customerID) {
+        // step 1: find customer's Cart
+        ShoppingCart shoppingCart = shoppingCartRepository.findByCustomer_CustomerID(customerID)
+                .orElse(null);
+        if (shoppingCart == null) return;
+
+        // step 2: get all items in cart
+        List<CartItem> cartItems = cartItemRepository.findByCart_CartID(shoppingCart.getCartID());
+
+        // step 3: delete all items
+        cartItemRepository.deleteAll(cartItems);
+    }
+
+    public CheckoutResult calculateCheckout(List<CartItem> cartItems, String shippingMethod) {
+        double subtotal = cartItems.stream().mapToDouble(CartItem::getSubtotal).sum();
+
+        // 1. Select the concrete Strategy based on the selection
+        ShippingStrategy strategy;
+        if ("express".equalsIgnoreCase(shippingMethod)) {
+            strategy = new ExpressShipping();
+        } else if ("sameday".equalsIgnoreCase(shippingMethod)) {
+            strategy = new SameDayShipping();
+        } else {
+            strategy = new StandardShipping();
+        }
+
+        // 2. Pass strategy to context
+        checkoutContext.setShippingStrategy(strategy);
+
+        // 3. Execute strategy calculation
+        double shippingFee = checkoutContext.executeShipping();
+        double totalAmount = subtotal + shippingFee;
+
+        return new CheckoutResult(subtotal, shippingFee, totalAmount);
+    }
+
+    public record CheckoutResult(double subtotal, double shippingFee, double totalAmount) {}
 }

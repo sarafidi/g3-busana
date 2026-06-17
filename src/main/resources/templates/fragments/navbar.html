@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<!--
+  navbar.html
+  ─────────────────────────────────────────────────────────────
+  Single source of truth for all navigation links.
+  To add / remove / rename a nav item, edit ONLY this file.
+
+  Usage inside header.html (or any fragment):
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+  Active-link highlighting:
+    Each <a> carries th:classappend so the "active" class is
+    added automatically when the current URL matches the href.
+    Tailwind class "text-stone-900 font-semibold" = active,
+    "text-stone-500 hover:text-stone-900" = inactive.
+  ─────────────────────────────────────────────────────────────
+-->
+
+<nav th:fragment="navbar" class="flex items-center gap-8">
+
+    <!-- CUSTOMER NAV LINKS -->
+    <!-- Add new pages here. Copy one <a> block, update href + label. -->
+
+    <a th:href="@{/}"
+        th:classappend="${#ctx.request?.requestURI == '/'}
+                        ? 'text-stone-900 font-semibold'
+                        : 'text-stone-500 hover:text-stone-900'"
+        class="text-sm tracking-wide transition-colors duration-150">
+        Home
+    </a>
+
+    <a th:href="@{/products}"
+        th:classappend="${#ctx.request?.requestURI != null and #ctx.request.requestURI.startsWith('/products')}
+                        ? 'text-stone-900 font-semibold'
+                        : 'text-stone-500 hover:text-stone-900'"
+        class="text-sm tracking-wide transition-colors duration-150">
+        Catalogue
+    </a>
+
+    <a th:href="@{/cart}"
+        th:classappend="${#ctx.request?.requestURI == '/cart'}
+                        ? 'text-stone-900 font-semibold'
+                        : 'text-stone-500 hover:text-stone-900'"
+        class="text-sm tracking-wide transition-colors duration-150">
+        Cart
+    </a>
+
+    <a th:href="@{/wishlist}"
+        th:classappend="${#ctx.request?.requestURI == '/wishlist'}
+                        ? 'text-stone-900 font-semibold'
+                        : 'text-stone-500 hover:text-stone-900'"
+        class="text-sm tracking-wide transition-colors duration-150">
+        Wishlist
+    </a>
+
+    <!-- Authenticated customer links (show only when session has customerId) -->
+    <a th:if="${session.customerId != null}"
+        th:href="@{/orders}"
+        th:classappend="${#ctx.request?.requestURI != null and #ctx.request.requestURI.startsWith('/orders')}
+                        ? 'text-stone-900 font-semibold'
+                        : 'text-stone-500 hover:text-stone-900'"
+        class="text-sm tracking-wide transition-colors duration-150">
+        My Orders
+    </a>
+
+</nav>
+
+</html>
