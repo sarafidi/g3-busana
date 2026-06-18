@@ -36,7 +36,7 @@ public class PromotionController {
         Promotion emptyPromotion = new Promotion();
 
         model.addAttribute("pageTitle", "Create A New Promotion");
-        model.addAttribute("newPromotion", emptyPromotion);
+        model.addAttribute("promotion", emptyPromotion);
 
         return "admin/promotion-form";
     }
@@ -61,18 +61,24 @@ public class PromotionController {
     }
 
     @PostMapping("/admin/promotions")
+
     public String savePromotion(
         @ModelAttribute("promotion") Promotion promotion,
+        Model model,
         RedirectAttributes redirectAttributes
     ) {
         
         try {
            promotionService.createPromotion(promotion);
            redirectAttributes.addFlashAttribute("successMessage", "Promotion " + promotion.getPromotionName() + " was saved successfully.");
+                   return "redirect:/admin/promotions";
+
         } catch (IllegalArgumentException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+          model.addAttribute("pageTitle", "Create A New Promotion");
+            model.addAttribute("errorMessage", ex.getMessage());
+            model.addAttribute("promotion", promotion);
+            return "admin/promotion-form";
         }
-        return "redirect:/admin/promotions";
     }
 
 
@@ -88,8 +94,10 @@ public class PromotionController {
             redirectAttributes.addFlashAttribute("successMessage", "Promotion " + updatedPromotion.getPromotionName() + " was updated successfully.");
             return "redirect:/admin/promotions";
         } catch (IllegalArgumentException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            return "admin/promotion-form";
+model.addAttribute("pageTitle", "Edit Promotion");
+            model.addAttribute("errorMessage", ex.getMessage());
+            model.addAttribute("promotion", updatedPromotion);           
+             return "admin/promotion-form";
         }
     }
 

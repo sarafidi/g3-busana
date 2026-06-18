@@ -18,6 +18,6 @@ public class EmailNotificationObserver implements OrderObserver {
     // }
 
     public void sendEmail(String customerEmail, String orderStatus){
-        System.out.println(customerEmail + "has been emailed about the order status change to:" + orderStatus );
+        System.out.println(customerEmail + " has been emailed about the order status change to: " + orderStatus );
     }
 }
