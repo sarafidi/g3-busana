@@ -54,7 +54,7 @@ public class AuthController {
         if (customer != null) {
             session.setAttribute("customerID", customer.getCustomerID());
             session.setAttribute("customerName", customer.getName());
-            return "redirect:/customer/home-temporary";
+            return "redirect:/customer/home";
         }
         model.addAttribute("error", "Invalid email or password");
         return "redirect:/customer/login";
@@ -64,11 +64,11 @@ public class AuthController {
     @GetMapping("/logout")
     public String logoutCustomer(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        return "redirect:index";
     }
 
     // customer home
-    @GetMapping("/customer/home-temporary")
+    @GetMapping("/customer/home")
     public String homeCustomer(HttpSession session, Model model) {
         String customerID = (String) session.getAttribute("customerID");
         if (customerID == null) return "redirect:/customer/login";
@@ -80,7 +80,7 @@ public class AuthController {
         );
         model.addAttribute("featuredProducts", featuredProducts);
         model.addAttribute("categories", productService.getCategories());
-        return "customer/home-temporary";
+        return "customer/home";
     }
 
     //admin login

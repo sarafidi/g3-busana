@@ -548,3 +548,116 @@ img {
         align-items: stretch;
     }
 }
+
+/* Profile Dropdown Styles */
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.2rem;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--customer-border);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--customer-text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-family: inherit; /* Use project font family */
+}
+
+.profile-btn:hover {
+    background: white;
+    border-color: var(--customer-accent);
+}
+
+.dropdown-arrow {
+    width: 0.8rem;
+    height: 0.8rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    transition: transform 0.2s ease;
+}
+
+.profile-dropdown:hover .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 6px; /* Space dropdown slightly below button */
+    background: white;
+    border: 1px solid var(--customer-border);
+    border-radius: 16px;
+    min-width: 140px;
+    box-shadow: var(--customer-shadow);
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+/* Invisible hover bridge to prevent the dropdown from closing when moving pointer from button to content */
+.dropdown-content::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: transparent;
+}
+
+.profile-dropdown:hover .dropdown-content {
+    display: block;
+    animation: dropdownFadeIn 0.15s ease-out;
+}
+
+.dropdown-content a,
+.dropdown-content form {
+    margin: 0;
+    display: block;
+}
+
+.dropdown-content a,
+.dropdown-content button {
+    display: block;
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    background: none;
+    border: none;
+    text-align: left;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--customer-text);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    text-decoration: none;
+    font-family: inherit; /* Use project font family */
+}
+
+.dropdown-content a:hover,
+.dropdown-content button:hover {
+    background: rgba(180, 87, 45, 0.08);
+    color: var(--customer-accent);
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

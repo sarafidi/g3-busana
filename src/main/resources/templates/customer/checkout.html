@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layouts/base2}"
+      layout:decorate="~{layouts/base}"
       lang="en">
 <head>
     <title>Checkout | BUSANA.my</title>
@@ -10,6 +10,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
 </head>
 <body>
+<main layout:fragment="content">
+    <header class="customer-topbar">
+        <a class="brand-mark" th:href="@{/}">BUSANA.my</a>
+        <nav class="topbar-links">
+            <a th:href="@{/customer/home}">Home</a>
+            <a class="is-active" th:href="@{/customer/products}">Catalogue</a>
+            <a th:href="@{/customer/cart}">My Shopping Cart</a>
+        </nav>
+        <div class="profile-dropdown" th:if="${session.customerID != null}">
+            <button class="profile-btn">
+                <span th:text="${session.customerName ?: 'Profile'}">Profile</span>
+                <svg class="dropdown-arrow" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+            </button>
+            <div class="dropdown-content">
+                <a th:href="@{/logout}">Logout</a>
+            </div>
+        </div>
+        <div th:if="${session.customerID == null}">
+            <a th:href="@{/customer/login}" class="profile-btn">Login</a>
+        </div>
+    </header>
+
     <main layout:fragment="content" class="max-w-4xl mx-auto py-8 px-4">
         <!-- Page heading -->
         <div class="mb-8 border-b border-stone-200 pb-4">

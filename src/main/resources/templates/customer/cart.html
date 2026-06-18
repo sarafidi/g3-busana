@@ -5,7 +5,7 @@
   ONLY the <main layout:fragment="content"> block is custom.
   Header, navbar, footer, Tailwind, flash messages → all from base.
 -->
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/base2}" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layouts/base}" lang="en">
   <head>
     <!-- Only override the page title prefix -->
     <title layout:title-pattern="$CONTENT_TITLE | BUSANA.my">Cart</title>
@@ -19,11 +19,24 @@
       <header class="customer-topbar">
         <a class="brand-mark" th:href="@{/}">BUSANA.my</a>
         <nav class="topbar-links">
-          <a th:href="@{/customer/home-temporary}">Home</a>
-          <a class="is-active" th:href="@{/customer/products}">Catalogue</a>
-          <a th:href="@{/customer/cart}">My Shopping Cart</a>
-          <a th:href="@{/admin/products}">Admin View</a>
+          <a th:href="@{/customer/home}">Home</a>
+          <a th:href="@{/customer/products}">Catalogue</a>
+          <a class="is-active" th:href="@{/customer/cart}">My Shopping Cart</a>
         </nav>
+        <div class="profile-dropdown" th:if="${session.customerID != null}">
+            <button class="profile-btn">
+                <span th:text="${session.customerName ?: 'Profile'}">Profile</span>
+                <svg class="dropdown-arrow" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+            </button>
+            <div class="dropdown-content">
+                <a th:href="@{/logout}">Logout</a>
+            </div>
+        </div>
+        <div th:if="${session.customerID == null}">
+            <a th:href="@{/customer/login}" class="profile-btn">Login</a>
+        </div>
       </header>
 
       <!-- Page heading -->

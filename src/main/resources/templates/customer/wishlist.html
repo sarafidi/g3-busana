@@ -13,15 +13,28 @@
     <body class="customer-shell">
         <header>
             <div class="customer-topbar">
-                <span class="brand-mark">BUSANA.my</span>
+                <a class="brand-mark" th:href="@{/}">BUSANA.my</a>
                 <!-- Navbar (shared across all customer pages) -->
                 <nav class="topbar-links">
-                    <a th:href="@{/}">Home</a>
-                    <a th:href="@{/products}">Shop</a>
-                    <a th:href="@{/cart}" class="is-active">Cart</a>
-                    <a th:href="@{/wishlist}">Wishlist</a>
-                    <a th:href="@{/logout}">Logout</a>
+                    <a th:href="@{/customer/home}">Home</a>
+                    <a th:href="@{/customer/products}">Catalogue</a>
+                    <a th:href="@{/customer/cart}">My Shopping Cart</a>
+                    <a th:href="@{/wishlist}" class="is-active">Wishlist</a>
                 </nav>
+                <div class="profile-dropdown" th:if="${session.customerID != null}">
+                    <button class="profile-btn">
+                        <span th:text="${session.customerName ?: 'Profile'}">Profile</span>
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="dropdown-content">
+                        <a th:href="@{/logout}">Logout</a>
+                    </div>
+                </div>
+                <div th:if="${session.customerID == null}">
+                    <a th:href="@{/customer/login}" class="profile-btn">Login</a>
+                </div>
             </div>
         </header>
 
