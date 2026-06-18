@@ -15,11 +15,14 @@ import com.busana.repository.OrderRepository;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderManager orderManager;
+    //private final EmailNotificationObserver emailObserver;
 
     //Constructor 
-    public OrderService(OrderRepository orderRepository, OrderManager orderManager) {
+    public OrderService(OrderRepository orderRepository, OrderManager orderManager, EmailNotificationObserver emailObserver) {
             this.orderRepository = orderRepository;
             this.orderManager = orderManager;
+            //this.emailObserver = emailObserver;
+          // orderManager.addObserver(emailObserver);
     }
 
     // View Orders by Admin
@@ -61,4 +64,17 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+public int getTotalOrderCount() {
+    List<?> orders = orderRepository.findAll();
+    return orders != null ? orders.size() : 0;
+}
+
+public int getOrderCountByStatus(String status) {
+    List<Order> orders = orderRepository.findAll();
+    if (orders == null) return 0;
+    
+    return (int) orders.stream()
+        .filter(order -> order.getOrderStatus() != null && order.getOrderStatus().equalsIgnoreCase(status))
+        .count();
+}
 }
