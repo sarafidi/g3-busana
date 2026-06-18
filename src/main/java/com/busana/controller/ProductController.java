@@ -18,14 +18,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.busana.model.Product;
 import com.busana.service.ProductService;
 import com.busana.service.ProductService.ProductFormData;
+import com.busana.service.CartWishlistService;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping
 public class ProductController {
     private final ProductService productService;
+    private final CartWishlistService cartWishlistService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, CartWishlistService cartWishlistService) {
         this.productService = productService;
+        this.cartWishlistService = cartWishlistService;
     }
 
     @GetMapping("/customer/products")
@@ -36,12 +40,22 @@ public class ProductController {
         @RequestParam(required = false) String colour,
         @RequestParam(required = false) BigDecimal minPrice,
         @RequestParam(required = false) BigDecimal maxPrice,
+        HttpSession session,
         Model model
     ) {
         List<Product> products = productService.getCustomerCatalogue(search, categoryId, size, colour, minPrice, maxPrice);
 
+        String customerID = (String) session.getAttribute("customerID");
+        List<String> wishlistedVariantIds = List.of();
+        if (customerID != null) {
+            wishlistedVariantIds = cartWishlistService.viewWishlist(customerID).stream()
+                .map(item -> item.getVariant().getVariantID())
+                .toList();
+        }
+
         model.addAttribute("pageTitle", "Product Catalogue");
         model.addAttribute("products", products);
+        model.addAttribute("wishlistedVariantIds", wishlistedVariantIds);
         model.addAttribute("categories", productService.getCategories());
         model.addAttribute("sizes", productService.getAvailableSizes());
         model.addAttribute("colours", productService.getAvailableColours());
@@ -61,13 +75,24 @@ public class ProductController {
     @GetMapping("/customer/products/{productId}")
     public String viewCustomerProductDetail(
         @PathVariable String productId,
+        HttpSession session,
         Model model,
         RedirectAttributes redirectAttributes
     ) {
         try {
             Product product = productService.getCustomerProduct(productId);
+
+            String customerID = (String) session.getAttribute("customerID");
+            List<String> wishlistedVariantIds = List.of();
+            if (customerID != null) {
+                wishlistedVariantIds = cartWishlistService.viewWishlist(customerID).stream()
+                    .map(item -> item.getVariant().getVariantID())
+                    .toList();
+            }
+
             model.addAttribute("pageTitle", product.getName());
             model.addAttribute("product", product);
+            model.addAttribute("wishlistedVariantIds", wishlistedVariantIds);
             model.addAttribute("relatedProducts", productService.getCustomerCatalogue(null, product.getCategory().getCategoryID(), null, null, null, null)
                 .stream()
                 .filter(item -> !item.getProductID().equals(productId))

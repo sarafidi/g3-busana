@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import jakarta.persistence.*;
 @Entity
-@Table(name = "OrderItem")   //prevents SQL conflicts with the "ORDER BY" statement     // must match SQL table name
+@Table(name = "OrderItem")
 public class OrderItem {
     
     @Id
@@ -23,14 +23,10 @@ public class OrderItem {
     private Integer quantity = 0; 
 
     @Column(name = "subtotal", precision = 10, scale = 2, nullable = false)     
-    private BigDecimal subtotal = BigDecimal.ZERO; //avoiding object instantiation
+    private BigDecimal subtotal = BigDecimal.ZERO;
     
 
-    // --- Constructor --------------------------
     public OrderItem() {}        // always include an empty constructor for JPA
-
-    // --- Getter & Setters --------------------------
-
 
     public String getOrderItemID() {
         return orderItemID;
@@ -74,4 +70,3 @@ public class OrderItem {
     }
 
 }
-

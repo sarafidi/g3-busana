@@ -25,14 +25,14 @@
 
 <body>
 
-<main layout:fragment="content" class="mx-20">
+<main layout:fragment="content" class="mx-20 mb-20">
      <header class="customer-topbar">
             <a class="brand-mark" th:href="@{/}">BUSANA.my</a>
             <nav class="topbar-links">
                 <a class="is-active" th:href="@{/customer/home}">Home</a>
                 <a th:href="@{/customer/products}">Catalogue</a>
+                <a th:href="@{/wishlist}">Wishlist</a>
                 <a th:href="@{/customer/cart}">My Shopping Cart</a>
-                <a th:href="@{/admin/products}">Admin View</a>
             </nav>
             <div class="profile-dropdown" th:if="${session.customerID != null}">
                 <button class="profile-btn">

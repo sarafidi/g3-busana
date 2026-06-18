@@ -32,10 +32,28 @@ document.addEventListener("DOMContentLoaded", () => {
         const cartVariantInput = document.getElementById("cartVariantID");
         const wishlistVariantInput = document.getElementById("wishlistVariantID");
         const addToCartBtn = document.getElementById("addToCartBtn");
+        const addToWishlistBtn = document.getElementById("addToWishlistBtn");
         const quantityInput = document.getElementById("quantity");
 
         if (cartVariantInput) cartVariantInput.value = variantId;
         if (wishlistVariantInput) wishlistVariantInput.value = variantId;
+
+        // Check if selected variant is wishlisted
+        const wishlistedIdsAttr = picker.getAttribute("data-wishlisted-ids") || "";
+        const wishlistedIds = wishlistedIdsAttr.split(",").map(id => id.trim()).filter(Boolean);
+        const isWishlisted = wishlistedIds.includes(variantId);
+
+        if (addToWishlistBtn) {
+            if (isWishlisted) {
+                addToWishlistBtn.disabled = false;
+                addToWishlistBtn.textContent = "Wishlisted";
+                addToWishlistBtn.classList.add("is-wishlisted");
+            } else {
+                addToWishlistBtn.disabled = false;
+                addToWishlistBtn.textContent = "Add to Wishlist";
+                addToWishlistBtn.classList.remove("is-wishlisted");
+            }
+        }
 
         if (addToCartBtn) {
             if (stockLevel <= 0) {

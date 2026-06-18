@@ -1,163 +1,217 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle}">Order Manager</title>
+    <title th:text="'Order details: ' + ${order.orderID} + ' | BUSANA.my'">Order Details</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Instrument Sans & Prata -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Instrument Sans', sans-serif;
+            background-color: #fffbf6;
+            color: #2d201a;
+        }
+        .serif-font {
+            font-family: 'Prata', serif;
+        }
+    </style>
 </head>
+<body class="min-h-screen flex bg-[#fffbf6]">
 
-<body class="admin-shell">
-    <header class="admin-topbar">
-        <div>
-            <p class="eyebrow">Admin Panel</p>
-            <h1>Order Details</h1>
-        </div>
+    <!-- Sidebar Navigation -->
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('orders')}"></aside>
 
-        <div class="button-row">
-            <a class="button-secondary" th:href="@{/admin/orders}">Back to Order List</a>
-        </div>
-    </header>
+    <!-- Main Content Area -->
+    <main class="flex-grow p-8 max-w-7xl mx-auto overflow-y-auto">
 
-    <main class="admin-main">
-        <section class="surface-panel" th:if="${successMessage}">
-            <p class="feedback success" th:text="${successMessage}"></p>
-        </section>
-
-        <section class="surface-panel" th:if="${errorMessage}">
-            <p class="feedback error" th:text="${errorMessage}"></p>
-        </section>
-
-        <section class="catalogue-toolbar surface-panel">
-            <div class="section-heading">
-                <!-- <p class="eyebrow">Filters</p> -->
-                <h2>View order details and update order status</h2>
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8 pb-6 border-b border-[#3f291f]/5">
+            <div class="flex items-center gap-4">
+                <a th:href="@{/admin/orders}" class="p-2.5 bg-white border border-[#3f291f]/10 text-stone-600 rounded-xl hover:bg-[#fff5eb]/40 transition shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </a>
+                <div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs uppercase tracking-wider font-extrabold text-[#b4572d]">Fulfillment Console</span>
+                        <span th:if="${order.orderStatus == 'Pending'}" class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700 border border-amber-200/50">Pending</span>
+                        <span th:if="${order.orderStatus == 'Completed' || order.orderStatus == 'Shipped' || order.orderStatus == 'Paid' || order.orderStatus == 'Processing'}"
+                              class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-bold text-green-700 border border-green-200/50"
+                              th:text="${order.orderStatus}">Completed</span>
+                        <span th:unless="${order.orderStatus == 'Pending' || order.orderStatus == 'Completed' || order.orderStatus == 'Shipped' || order.orderStatus == 'Paid' || order.orderStatus == 'Processing'}"
+                              class="inline-flex items-center rounded-full bg-stone-50 px-2.5 py-0.5 text-xs font-bold text-stone-700 border border-stone-200/50"
+                              th:text="${order.orderStatus}">Other</span>
+                    </div>
+                    <h2 class="text-3xl font-bold text-[#2d201a] tracking-tight mt-1" th:text="'Order ID: ' + ${order.orderID}">Order ID</h2>
+                </div>
             </div>
-            <div class="table-container">
-                <table style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Order Date</th>
-                            <th>Order Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                            <tr>
-                        <td th:text="${order.orderID}"></td>
-                        <td th:text="${#temporals.format(order.orderDate, 'dd MMMM yyyy')}"></td>
-                        <td th:text="${order.orderStatus}"></td>
-                        <td>
-                        <form th:action="@{/admin/orders/{id}(id=${order.orderID})}" method="POST">
-    
-                            <select name="newStatus" class="action-button" required>
-                                <option value="" disabled selected>Update Status</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Processing">Processing</option>
-                                <option value="Approved">Approved</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Cancelled">Cancelled</option>
+        </header>
+
+        <!-- Feedback Messages -->
+        <div th:if="${successMessage}" class="mb-6 p-4 rounded-2xl bg-[#fff5eb] border border-green-200 text-green-700 text-sm font-medium flex gap-3 items-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+            </svg>
+            <span th:text="${successMessage}">Success!</span>
+        </div>
+
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-2xl bg-[#fff5eb] border border-red-200 text-red-700 text-sm font-medium flex gap-3 items-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+            <span th:text="${errorMessage}">Error!</span>
+        </div>
+
+        <!-- Detail Layout Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left 2 Cols: Order Summary & Items List -->
+            <div class="lg:col-span-2 space-y-8">
+
+                <!-- Order Items Panel -->
+                <section class="bg-white border border-[#3f291f]/10 rounded-3xl p-6 sm:p-8 shadow-sm">
+                    <h3 class="text-lg font-bold text-[#2d201a] mb-6">Items in Order</h3>
+
+                    <div th:if="${order.orderItems == null or order.orderItems.isEmpty()}" class="py-12 text-center bg-[#fffbf6]/40 border border-dashed border-[#3f291f]/10 rounded-2xl text-stone-400 text-sm">
+                        No individual items are listed for this transaction.
+                    </div>
+
+                    <div th:if="${order.orderItems != null and !order.orderItems.isEmpty()}" class="overflow-x-auto">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead>
+                                <tr class="text-xs uppercase font-bold text-[#6e5a4e] border-b border-[#3f291f]/10 pb-3">
+                                    <th class="py-2 pr-4">Product</th>
+                                    <th class="py-2 px-4">Variant</th>
+                                    <th class="py-2 px-4 text-center">Qty</th>
+                                    <th class="py-2 px-4 text-right">Unit Price</th>
+                                    <th class="py-2 pl-4 text-right">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#3f291f]/5">
+                                <tr th:each="item : ${order.orderItems}">
+                                    <td class="py-4 pr-4">
+                                        <p class="font-bold text-[#2d201a]" th:text="${item.variant?.product?.name}">Product Name</p>
+                                        <span class="text-[10px] text-[#b4572d] font-semibold" th:text="${item.variant?.product?.productID}">PRD-001</span>
+                                    </td>
+                                    <td class="py-4 px-4 text-stone-600 text-xs font-medium" th:text="${item.variant?.colour} + ' / ' + ${item.variant?.size}">
+                                        Black / M
+                                    </td>
+                                    <td class="py-4 px-4 text-center font-bold text-[#2d201a]" th:text="${item.quantity}">
+                                        1
+                                    </td>
+                                    <td class="py-4 px-4 text-right font-medium text-stone-500"
+                                        th:text="'RM ' + ${#numbers.formatDecimal(item.variant?.product?.basePrice, 1, 'COMMA', 2, 'POINT')}">
+                                        RM 0.00
+                                    </td>
+                                    <td class="py-4 pl-4 text-right font-bold text-[#2d201a]"
+                                        th:text="'RM ' + ${#numbers.formatDecimal(item.getsubTotal(), 1, 'COMMA', 2, 'POINT')}">
+                                        RM 0.00
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Totals Summary Section -->
+                    <div class="mt-8 pt-6 border-t border-[#3f291f]/10 flex flex-col items-end space-y-2 text-sm">
+                        <div class="flex justify-between w-64 text-stone-500 font-medium">
+                            <span>Subtotal:</span>
+                            <span th:text="'RM ' + ${#numbers.formatDecimal(order.totalAmount.subtract(order.shippingFee), 1, 'COMMA', 2, 'POINT')}">RM 0.00</span>
+                        </div>
+                        <div class="flex justify-between w-64 text-stone-500 font-medium">
+                            <span>Shipping Fee:</span>
+                            <span th:text="'RM ' + ${#numbers.formatDecimal(order.shippingFee, 1, 'COMMA', 2, 'POINT')}">RM 0.00</span>
+                        </div>
+                        <div class="flex justify-between w-64 pt-3 border-t border-[#3f291f]/10 text-base font-bold text-[#2d201a]">
+                            <span>Grand Total:</span>
+                            <span class="text-[#b4572d]" th:text="'RM ' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">RM 0.00</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right 1 Col: Customer details & Status actions -->
+            <div class="space-y-8">
+
+                <!-- Status Control Panel -->
+                <div class="bg-white border border-[#3f291f]/10 rounded-3xl p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-[#2d201a] mb-4">Transition Status</h3>
+
+                    <form method="post" th:action="@{/admin/orders/{id}(id=${order.orderID})}" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs uppercase tracking-wider font-bold text-[#6e5a4e]">Fulfillment Status</label>
+                            <select name="newStatus" class="w-full px-4 py-2.5 rounded-xl border border-[#3f291f]/15 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d] text-sm font-medium">
+                                <option value="Pending" th:selected="${order.orderStatus == 'Pending'}">Pending</option>
+                                <option value="Paid" th:selected="${order.orderStatus == 'Paid'}">Paid</option>
+                                <option value="Processing" th:selected="${order.orderStatus == 'Processing'}">Processing</option>
+                                <option value="Shipped" th:selected="${order.orderStatus == 'Shipped'}">Shipped</option>
+                                <option value="Completed" th:selected="${order.orderStatus == 'Completed'}">Completed</option>
+                                <option value="Cancelled" th:selected="${order.orderStatus == 'Cancelled'}">Cancelled</option>
                             </select>
+                        </div>
 
-                            <button type="submit" class="action-button">Update</button>
-                        </form>
-                        </td>
-                    </tr> 
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                        <button type="submit" class="w-full py-3 bg-[#b4572d] hover:bg-[#8f3c1c] text-white text-xs font-bold rounded-xl transition shadow-md shadow-[#b4572d]/10">
+                            Update Order Status
+                        </button>
+                    </form>
+                </div>
 
-            <section class="catalogue-toolbar surface-panel">
-            <div class="section-heading">
-                <h2>Customer Information</h2>
-            </div>
-            <div class="table-container">
-                <table style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Customer ID</th>
-                            <th>Customer Name</th>
-                            <th>Customer Email</th>
-                            <th>Delivery Address</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                            <tr>
-                        <td th:text="${order.customer.customerID}"></td>
-                        <td th:text="${order.customer.name}"></td>
-                        <td th:text="${order.customer.Email}"></td>
-                        <td th:text="${order.deliveryAddress}"></td>                     
-                            </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                <!-- Customer Details Panel -->
+                <div class="bg-white border border-[#3f291f]/10 rounded-3xl p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-[#2d201a] mb-5">Customer Profile</h3>
 
-         <section class="empty-state surface-panel" th:if="${order.promotion == null}">
-            <h2>No promotion attached to this order.</h2>
-        </section>
+                    <div class="space-y-4 text-xs font-medium">
+                        <div>
+                            <p class="text-stone-400 uppercase tracking-wider font-semibold">Customer ID</p>
+                            <p class="text-sm font-bold text-[#2d201a] mt-0.5" th:text="${order.customer?.customerID}">CUST-001</p>
+                        </div>
+                        <div>
+                            <p class="text-stone-400 uppercase tracking-wider font-semibold">Full Name</p>
+                            <p class="text-sm font-bold text-[#2d201a] mt-0.5" th:text="${order.customer?.name}">John Doe</p>
+                        </div>
+                        <div>
+                            <p class="text-stone-400 uppercase tracking-wider font-semibold">Email Address</p>
+                            <p class="text-sm font-bold text-[#2d201a] mt-0.5" th:text="${order.customer?.email}">customer@busana.my</p>
+                        </div>
+                        <div class="pt-4 border-t border-[#3f291f]/5">
+                            <p class="text-stone-400 uppercase tracking-wider font-semibold">Delivery Address</p>
+                            <p class="text-sm font-bold text-[#2d201a] mt-1 whitespace-pre-line leading-relaxed" th:text="${order.deliveryAddress}">
+                                No delivery address specified.
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-             <section class="catalogue-toolbar surface-panel" th:if="${order.promotion != null}">
-            <div class="section-heading">
-                <h2>Promotion Information</h2>
-            </div>
-            <div class="table-container">
-                <table style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Promotion ID</th>
-                            <th>Promotion Name</th>
-                            <th>Discount Type</th>
-                            <th>Discount Value</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                            <tr>
-                    <td th:text="${order.promotion.promotionID}"></td> 
-                    <td th:text="${order.promotion.promotionName}"></td>
-                    <td th:text="${order.promotion.discountType}"></td> 
-                    <td th:text="${order.promotion.discountValue}"></td> 
-                    <td><a class="action-button" th:href="@{/admin/promotions/{id}/edit(id=${order.promotion.promotionID})}">Edit</a></td>                                          
-                            </tr>
-                    </tbody>
-                </table>
-            </div>
-                    </section>
+                <!-- Transaction Details Panel -->
+                <div class="bg-white border border-[#3f291f]/10 rounded-3xl p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-[#2d201a] mb-5">Audit Log</h3>
 
-             <section class="catalogue-toolbar surface-panel">
-            <div class="section-heading">
-                <h2>Payment Summary</h2>
+                    <div class="space-y-4 text-xs font-medium">
+                        <div>
+                            <p class="text-stone-400 uppercase tracking-wider font-semibold">Order Placed Date</p>
+                            <p class="text-sm font-bold text-[#2d201a] mt-0.5" th:text="${order.orderDate}">2026-06-18</p>
+                        </div>
+                        <div>
+                            <p class="text-stone-400 uppercase tracking-wider font-semibold">Payment Status</p>
+                            <span class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-bold text-green-700 border border-green-200/50 mt-1" th:text="${order.paymentStatus}">Pending</span>
+                        </div>
+                        <div th:if="${order.promotion != null}">
+                            <p class="text-stone-400 uppercase tracking-wider font-semibold">Applied Discount Code</p>
+                            <p class="text-sm font-bold text-[#b4572d] mt-0.5" th:text="${order.promotion.promotionID} + ' (' + ${order.promotion.promotionName} + ')'">PROMO</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="table-container">
-                <table style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Payment Status</th>
-                            <th>Shipping Fee</th>
-                            <th>Total Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                            <tr>
-                        <td th:text="${order.paymentStatus}"></td>
-                        <td th:text="'RM ' + ${#numbers.formatDecimal(order.ShippingFee, 1, 'COMMA', 2, 'POINT')}"></td>
-                        <td th:text="'RM ' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}"></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-        
+        </div>
     </main>
 </body>
-
 </html>

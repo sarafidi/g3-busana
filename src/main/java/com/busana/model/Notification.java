@@ -3,7 +3,7 @@ package com.busana.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Notification")       // must match SQL table name
+@Table(name = "Notification")
 public class Notification {
     
     @Id
@@ -24,8 +24,7 @@ public class Notification {
     @Column(name = "status", length = 20, nullable = false)
     private String status = "unread";
 
-    // --- Constructor --------------------------
-    public Notification() {}        // always include an empty constructor for JPA
+    public Notification() {}
 
     // --- Getter & Setters --------------------------
     public String getNotificationID() { return notificationID; }

@@ -18,7 +18,6 @@ public class PromotionService {
         this.promotionRepository = promotionRepository;
     }
 
-    // Admin Creates Promotion
     public Promotion createPromotion(Promotion promotion){
 
                 if (promotion.getStartDate() != null && promotion.getEndDate() != null) {

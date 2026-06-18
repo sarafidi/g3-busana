@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "Promotion")       // must match SQL table name
+@Table(name = "Promotion")
 public class Promotion {
     
     @Id
@@ -19,25 +19,23 @@ public class Promotion {
     @Column(name = "discountType", length = 20, nullable = false)    
     private String  discountType;
 
-    @Column(name = "discountValue", precision = 10, scale = 2, nullable = false)     // precision = total digits allowed; scale = digits after the decimal point
-    private BigDecimal discountValue; // (double or float) for financial calculations will introduce binary rounding errors 
+    @Column(name = "discountValue", precision = 10, scale = 2, nullable = false)
+    private BigDecimal discountValue;
     
     @Column(name = "applicableCategory", length = 100)    
     private String  applicableCategory;
 
     @Column(name = "startDate", nullable = false)    
-    private LocalDate  startDate; //only shows the date no time
+    private LocalDate  startDate;
 
     @Column(name = "endDate", nullable = false)    
     private LocalDate endDate;
 
     @Column(name = "status", length = 20, nullable = false)    
-    private String  status = "active"; //default
+    private String  status = "active";
 
-    // --- Constructor --------------------------
-    public Promotion() {}        // always include an empty constructor for JPA
+    public Promotion() {}
 
-    // --- Getter & Setters --------------------------
     public String getPromotionID() { return promotionID; }
     public void setPromotionID(String promotionID) { this.promotionID = promotionID; }
 
@@ -63,4 +61,3 @@ public class Promotion {
     public void setStatus(String status) { this.status = status; }
 
 }
-

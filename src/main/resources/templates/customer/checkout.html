@@ -15,8 +15,9 @@
         <a class="brand-mark" th:href="@{/}">BUSANA.my</a>
         <nav class="topbar-links">
             <a th:href="@{/customer/home}">Home</a>
-            <a class="is-active" th:href="@{/customer/products}">Catalogue</a>
-            <a th:href="@{/customer/cart}">My Shopping Cart</a>
+            <a th:href="@{/customer/products}">Catalogue</a>
+            <a th:href="@{/wishlist}">Wishlist</a>
+            <a class="is-active" th:href="@{/customer/cart}">My Shopping Cart</a>
         </nav>
         <div class="profile-dropdown" th:if="${session.customerID != null}">
             <button class="profile-btn">

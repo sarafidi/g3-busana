@@ -1,4 +1,3 @@
-// Concrete Subject
 package com.busana.service;
 
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 public class OrderManager implements OrderSubject {
     
     private List <OrderObserver> observers = new ArrayList<>();
-    //private String orderStatus;
     @Override
     public void addObserver(OrderObserver observer) {
         observers.add(observer);        
@@ -30,11 +28,4 @@ public class OrderManager implements OrderSubject {
         for(OrderObserver observer: observers)
             observer.update(order);
     }
-
-    // public void updateOrderStatus(Order order, String newStatus){
-    //     this.orderStatus = newStatus;
-    //     notifyObservers(order);
-    // }
-
-    
 }

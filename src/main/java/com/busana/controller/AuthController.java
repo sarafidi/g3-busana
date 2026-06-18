@@ -37,7 +37,6 @@ public class AuthController {
         this.promotionService = promotionService;
     }
 
-    //customer registration
     @GetMapping("/customer/register")
     public String showRegistrationForm(Model model) {
         model.addAttribute("customer", new Customer());
@@ -51,7 +50,6 @@ public class AuthController {
         return "customer/register";
     }   
 
-    //customer login
     @GetMapping("/customer/login")
     public String redirectToCustomerLogin() {
         return "redirect:/";
@@ -70,14 +68,12 @@ public class AuthController {
         return "redirect:/";
     }
 
-    //customer logout --need fix later
     @GetMapping("/logout")
     public String logoutCustomer(HttpSession session) {
         session.invalidate();
         return "redirect:/";
     }
 
-    // customer home
     @GetMapping("/customer/home")
     public String homeCustomer(HttpSession session, Model model) {
         String customerID = (String) session.getAttribute("customerID");
@@ -93,8 +89,7 @@ public class AuthController {
         return "customer/home";
     }
 
-    //admin login
-    @GetMapping("/admin/login") 
+    @GetMapping("/admin/login")
     public String showAdminLoginForm() {
         return "admin/login";
     }   
@@ -124,35 +119,35 @@ public class AuthController {
         if (session.getAttribute("admin") == null) {
             return "redirect:/admin/login";
         }
-        
+
         List<Product> allProducts = productService.getAdminCatalogue(null, null, null);
         long totalProducts = allProducts.size();
-        
+
         // Count low stock (any variant stock < 5)
         long lowStockCount = allProducts.stream()
             .filter(p -> p.getVariants().stream().anyMatch(v -> v.getStockLevel() < 5))
             .count();
-            
+
         List<Order> allOrders = orderService.getAllOrders();
         long totalOrders = allOrders.size();
-        
+
         long pendingOrdersCount = allOrders.stream()
             .filter(o -> "Pending".equalsIgnoreCase(o.getOrderStatus()))
             .count();
-            
+
         BigDecimal totalRevenue = allOrders.stream()
             .filter(o -> "Completed".equalsIgnoreCase(o.getOrderStatus()) || "Shipped".equalsIgnoreCase(o.getOrderStatus()) || "Paid".equalsIgnoreCase(o.getOrderStatus()))
             .map(Order::getTotalAmount)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
-            
+
         long totalPromotions = promotionService.getAllPromotions().size();
-        
+
         // Pass top 5 recent orders sorted by date descending
         List<Order> recentOrders = allOrders.stream()
             .sorted(Comparator.comparing(Order::getOrderDate).reversed())
             .limit(5)
             .toList();
-            
+
         // Pass low stock items (top 5)
         List<Product> lowStockItems = allProducts.stream()
             .filter(p -> p.getVariants().stream().anyMatch(v -> v.getStockLevel() < 5))
@@ -169,12 +164,11 @@ public class AuthController {
         model.addAttribute("totalPromotions", totalPromotions);
         model.addAttribute("recentOrders", recentOrders);
         model.addAttribute("lowStockItems", lowStockItems);
-        
+
         return "admin/dashboard";
     }
 
-    //admin logout
-    @GetMapping("/admin/logout")    
+    @GetMapping("/admin/logout")
     public String logoutAdmin(HttpSession session) {
         session.invalidate();
         return "redirect:/admin/login";

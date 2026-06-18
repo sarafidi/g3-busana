@@ -18,8 +18,8 @@
                 <nav class="topbar-links">
                     <a th:href="@{/customer/home}">Home</a>
                     <a th:href="@{/customer/products}">Catalogue</a>
+                    <a class="is-active" th:href="@{/wishlist}">Wishlist</a>
                     <a th:href="@{/customer/cart}">My Shopping Cart</a>
-                    <a th:href="@{/wishlist}" class="is-active">Wishlist</a>
                 </nav>
                 <div class="profile-dropdown" th:if="${session.customerID != null}">
                     <button class="profile-btn">
@@ -50,39 +50,82 @@
             <p th:if="${error}" th:text="${error}" class="feedback error" style="margin-bottom: 1rem;"></p>
 
             <!-- Empty wishlist state -->
-            <div th:if="${#lists.isEmpty(wishlistItems)}" class="surface-panel empty-state">
-                <p class="muted-text">Your wishlist is empty</p>
-                <a th:href="@{/products}" class="button-primary" style="margin-top: 1rem; display: inline-flex;">
-                    Continue Viewing
+            <div th:if="${#lists.isEmpty(wishlistItems)}" class="surface-panel empty-state" style="padding: 4rem 1rem;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width: 3.5rem; height: 3.5rem; color: var(--customer-muted); margin: 0 auto 1.25rem;">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <h3 style="margin-bottom: 0.5rem; font-family: 'Prata', Georgia, serif; font-weight: 400; font-size: 1.5rem;">Your wishlist is empty</h3>
+                <p class="muted-text" style="margin-bottom: 1.5rem;">Save your favourite items here to view them later.</p>
+                <a th:href="@{/customer/products}" class="button-primary" style="display: inline-flex;">
+                    Browse Catalogue
                 </a>
             </div>
 
             <div th:unless="${#lists.isEmpty(wishlistItems)}" class="results-panel">
-                
-                <!-- Each cart item -->
-                <div th:each="wishlistItem : ${wishlistItems}" class="surface-panel">
-                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem; flex-wrap: wrap;">
+                <div class="product-grid">
+                    <div class="product-card" th:each="wishlistItem : ${wishlistItems}">
                         
-                        <!-- Item info -->
-                        <div style="display: grid; gap: 0.4rem;">
-                            <p class="eyebrow" th:text="${wishlistItem.variant.variantLabel}">Size / Colour</p>
-                            <h3 style="margin: 0;" th:text="${wishlistItem.variant.product.name}">Product Name</h3>
-                        </div>
+                        <!-- Product link wraps the image and details -->
+                        <a th:href="@{/customer/products/{productId}(productId=${wishlistItem.variant.product.productID})}" class="product-card-link" style="display: block; text-decoration: none; color: inherit;">
+                            <div class="product-card-media" style="position: relative;">
+                                <img
+                                    th:if="${wishlistItem.variant.product.primaryImage != ''}"
+                                    th:src="${wishlistItem.variant.product.primaryImage}"
+                                    th:alt="${wishlistItem.variant.product.name}">
+                                <div class="image-fallback" th:if="${wishlistItem.variant.product.primaryImage == ''}">
+                                    <span>BUSANA</span>
+                                </div>
+                            </div>
 
-                        <!-- Remove actions -->
-                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-                            <!-- Remove form  -->
-                            <form th:action="@{/wishlist/remove}" method="post">
+                            <div class="product-card-content">
+                                <div class="card-badges">
+                                    <span class="badge badge-soft" th:text="${wishlistItem.variant.product.categoryName}">Category</span>
+                                    <span class="badge" th:classappend="${wishlistItem.variant.available} ? ' badge-success' : ' badge-muted'"
+                                        th:text="${wishlistItem.variant.available} ? 'In Stock' : 'Out of Stock'">
+                                        In Stock
+                                    </span>
+                                </div>
+
+                                <div class="card-copy">
+                                    <h3 th:text="${wishlistItem.variant.product.name}">Product Name</h3>
+                                </div>
+
+                                <div class="card-meta">
+                                    <p class="price-tag" th:text="|RM ${#numbers.formatDecimal(wishlistItem.variant.product.basePrice, 1, 'COMMA', 2, 'POINT')}|">RM 0.00</p>
+                                    <p class="variant-line" th:text="|Selected: ${wishlistItem.variant.variantLabel}|">Variant: Black / M</p>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Actions block outside the main link but inside the card -->
+                        <div style="padding: 0 1.25rem 1.25rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
+                            <!-- Add to Cart Form (if variant is in stock) -->
+                            <form th:action="@{/cart/add}" method="post" th:if="${wishlistItem.variant.available}">
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <input type="hidden" name="variantID" th:value="${wishlistItem.variant.variantID}" />
+                                <input type="hidden" name="quantity" value="1" />
+                                <button type="submit" class="button-primary" style="width: 100%; font-size: 0.85rem; padding: 0.6rem 1rem;">
+                                    Add to Cart
+                                </button>
+                            </form>
+                            
+                            <!-- Remove Form -->
+                            <form th:action="@{/wishlist/remove}" method="post" style="width: 100%;">
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                                 <input type="hidden" name="wishlistItemID" th:value="${wishlistItem.wishlistItemID}">
-                                <button type="submit" class="button-secondary" style="color: #8d2415;">Remove</button>
+                                <button type="submit" class="button-secondary" style="width: 100%; font-size: 0.85rem; padding: 0.6rem 1rem; color: #8d2415; border-color: rgba(141, 36, 21, 0.25);">
+                                    Remove
+                                </button>
                             </form>
                         </div>
                     </div>
                 </div>
 
-                <!-- Products page button -->
-                <div class="surface-panel" style="display: flex; justify-content: flex-end;">
-                    <a th:href="@{/products}" class="button-primary">Proceed to Products Page -></a>
+                <!-- Back to products button -->
+                <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                    <a th:href="@{/customer/products}" class="button-secondary">
+                        ← Continue Shopping
+                    </a>
                 </div>
             </div>
         </main>

@@ -22,7 +22,6 @@ public class OrderController {
             public OrderController(OrderService orderService) {
                 this.orderService = orderService;
             }
-    // Admin View All Orders
     @GetMapping("/admin/orders")
     public String viewAllOrders(Model model) {
         model.addAttribute("pageTitle", "Orders");
@@ -30,7 +29,6 @@ public class OrderController {
         return "admin/order-list";
     }
 
-    // Admin Views Order Details
     @GetMapping("/admin/orders/{orderId}")
     public String viewOrderDetails(
         @PathVariable String orderId,
@@ -48,7 +46,6 @@ public class OrderController {
         }
     }
 
-    //Customer Views Order Confirmation Page
     @GetMapping("/customer/order-confirmation/{orderId}")
     public String viewOrderConfirmationDetails(
         @PathVariable String orderId,
@@ -60,7 +57,6 @@ public class OrderController {
             model.addAttribute("pageTitle", "Order Confirmation for Order: " + order.getOrderID());
             model.addAttribute("order", order);
             
-            // Populate individual fields for customer/order-confirmation.html
             model.addAttribute("deliveryAddress", order.getDeliveryAddress());
             model.addAttribute("shippingFee", order.getShippingFee());
             model.addAttribute("totalAmount", order.getTotalAmount());
@@ -101,4 +97,3 @@ public class OrderController {
     }
 
 }
-
