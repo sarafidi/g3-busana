@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Busana</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body class="admin-shell">
+
+    <header class="admin-topbar">
+        <div>
+            <p class="eyebrow">Admin Panel</p>
+            <h1 th:text="${pageTitle}">Admin Dashboard</h1>
+        </div>
+    </header>
+
+    <main class="admin-main" style="grid-template-columns: 1fr; gap: 1.75rem;">
+
+        <section class="surface-panel">
+            <div class="section-heading" style="margin-bottom: 1.5rem;">
+                <h2>Orders Overview</h2>
+            </div>
+            <div class="admin-specs" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                <div>
+                    <dt>Total Orders</dt>
+                    <dd style="font-size: 1.8rem; font-family: 'Fraunces', serif; color: var(--admin-text);" th:text="${totalOrders}">0</dd>
+                </div>
+                <div>
+                    <dt style="color: var(--admin-warm);">Pending</dt>
+                    <dd style="font-size: 1.8rem; font-family: 'Fraunces', serif; color: var(--admin-warm);" th:text="${pendingOrders}">0</dd>
+                </div>
+                <div>
+                    <dt style="color: var(--admin-accent);">Processing</dt>
+                    <dd style="font-size: 1.8rem; font-family: 'Fraunces', serif; color: var(--admin-accent);" th:text="${processingOrders}">0</dd>
+                </div>
+                <div>
+                    <dt style="color: var(--admin-accent-dark);">Delivered</dt>
+                    <dd style="font-size: 1.8rem; font-family: 'Fraunces', serif; color: var(--admin-accent-dark);" th:text="${deliveredOrders}">0</dd>
+                </div>
+                <div>
+                    <dt style="color: var(--admin-danger);">Cancelled</dt>
+                    <dd style="font-size: 1.8rem; font-family: 'Fraunces', serif; color: var(--admin-danger);" th:text="${cancelledOrders}">0</dd>
+                </div>
+            </div>
+        </section>
+
+        <section class="surface-panel">
+            <div class="section-heading" style="margin-bottom: 1.5rem;">
+                <h2>Promotions Overview</h2>
+            </div>
+            <div class="admin-specs">
+                <div>
+                    <dt>Total Promotions</dt>
+                    <dd style="font-size: 1.8rem; font-family: 'Fraunces', serif; color: var(--admin-text);" th:text="${totalPromotions}">0</dd>
+                </div>
+                <div>
+                    <dt style="color: var(--admin-accent);">Active Promotions</dt>
+                    <dd style="font-size: 1.8rem; font-family: 'Fraunces', serif; color: var(--admin-accent);" th:text="${activePromotions}">0</dd>
+                </div>
+                <div>
+                    <dt style="color: var(--admin-muted);">Inactive Promotion</dt>
+                    <dd style="font-size: 1.8rem; font-family: 'Fraunces', serif; color: var(--admin-muted);" th:text="${inactivePromotions}">0</dd>
+                </div>
+            </div>
+        </section>
+
+        <section class="surface-panel">
+            <div class="section-heading" style="margin-bottom: 1.5rem;">
+                <p class="eyebrow">Navigation shortcuts</p>
+                <h2>Quick Actions</h2>
+            </div>
+            <div class="admin-product-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                
+                <div style="background: rgba(255, 255, 255, 0.5); padding: 1.35rem; border-radius: 20px; border: 1px solid var(--admin-border); display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+                    <div>
+                        <h3 style="margin: 0 0 0.35rem 0; font-size: 1.15rem; font-weight: 700;">Order Management</h3>
+                        <p class="muted-text" style="font-size: 0.88rem;">Review order details, track customer shipments, and update status.</p>
+                    </div>
+                    <a class="button-secondary" style="width: 100%; text-align: center;" th:href="@{/admin/orders}">View Orders</a>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.5); padding: 1.35rem; border-radius: 20px; border: 1px solid var(--admin-border); display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+                    <div>
+                        <h3 style="margin: 0 0 0.35rem 0; font-size: 1.15rem; font-weight: 700;">Promotions Manager</h3>
+                        <p class="muted-text" style="font-size: 0.88rem;">Modify promotion names, change activation statuses and edit promotions.</p>
+                    </div>
+                    <a class="button-secondary" style="width: 100%; text-align: center;" th:href="@{/admin/promotions}">Manage Promotions</a>
+                </div>
+
+                <div style="background: rgba(255, 255, 255, 0.5); padding: 1.35rem; border-radius: 20px; border: 1px solid var(--admin-border); display: flex; flex-direction: column; justify-content: space-between; gap: 1rem;">
+                    <div>
+                        <h3 style="margin: 0 0 0.35rem 0; font-size: 1.15rem; font-weight: 700;">New Promotion Launch</h3>
+                        <p class="muted-text" style="font-size: 0.88rem;">Create new promotions with percentage discounts or value deduction instantly.</p>
+                    </div>
+                    <a class="button-primary" style="width: 100%; text-align: center;" th:href="@{/admin/promotions/new}">Create Promotion</a>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+</body>
+</html>
