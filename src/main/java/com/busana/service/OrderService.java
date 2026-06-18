@@ -64,4 +64,17 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+public int getTotalOrderCount() {
+    List<?> orders = orderRepository.findAll();
+    return orders != null ? orders.size() : 0;
+}
+
+public int getOrderCountByStatus(String status) {
+    List<Order> orders = orderRepository.findAll();
+    if (orders == null) return 0;
+    
+    return (int) orders.stream()
+        .filter(order -> order.getOrderStatus() != null && order.getOrderStatus().equalsIgnoreCase(status))
+        .count();
+}
 }
