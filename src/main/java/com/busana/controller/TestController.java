@@ -38,7 +38,7 @@ public class TestController {
         model.addAttribute("successMessage", "SpringBoot + Thymeleaf + MySQL is working correctly!");
 
         // returns templates/customer/home.html
-        return "customer/home";
+        return "index";
     }
     
     @GetMapping("/test")
@@ -46,7 +46,7 @@ public class TestController {
         // visit http://localhost:8080/test to see a plain confirmation
         model.addAttribute("pageTitle", "Stack Test");
         model.addAttribute("successMessage", "Controller -> Service -> Repository chain is ready");
-        return "customer/home";
+        return "index";
     }
     
 }

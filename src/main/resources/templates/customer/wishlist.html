@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title th:text="${pageTitle}">Wishlist - BUSANA.my</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" th:href="@{/css/customer.css}">
+    </head>
+
+    <body class="customer-shell">
+        <header>
+            <div class="customer-topbar">
+                <a class="brand-mark" th:href="@{/}">BUSANA.my</a>
+                <!-- Navbar (shared across all customer pages) -->
+                <nav class="topbar-links">
+                    <a th:href="@{/customer/home}">Home</a>
+                    <a th:href="@{/customer/products}">Catalogue</a>
+                    <a th:href="@{/customer/cart}">My Shopping Cart</a>
+                    <a th:href="@{/wishlist}" class="is-active">Wishlist</a>
+                </nav>
+                <div class="profile-dropdown" th:if="${session.customerID != null}">
+                    <button class="profile-btn">
+                        <span th:text="${session.customerName ?: 'Profile'}">Profile</span>
+                        <svg class="dropdown-arrow" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                    <div class="dropdown-content">
+                        <a th:href="@{/logout}">Logout</a>
+                    </div>
+                </div>
+                <div th:if="${session.customerID == null}">
+                    <a th:href="@{/customer/login}" class="profile-btn">Login</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page content -->
+        <main class="catalogue-main">
+            <!-- Page heading -->
+            <div class="hero-card" style="margin-bottom: 1.25rem;">
+                <p class="eyebrow">Your Selection</p>
+                <h1>Wishlist</h1>
+            </div>
+
+            <!-- Error message -->
+            <p th:if="${error}" th:text="${error}" class="feedback error" style="margin-bottom: 1rem;"></p>
+
+            <!-- Empty wishlist state -->
+            <div th:if="${#lists.isEmpty(wishlistItems)}" class="surface-panel empty-state">
+                <p class="muted-text">Your wishlist is empty</p>
+                <a th:href="@{/products}" class="button-primary" style="margin-top: 1rem; display: inline-flex;">
+                    Continue Viewing
+                </a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(wishlistItems)}" class="results-panel">
+                
+                <!-- Each cart item -->
+                <div th:each="wishlistItem : ${wishlistItems}" class="surface-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem; flex-wrap: wrap;">
+                        
+                        <!-- Item info -->
+                        <div style="display: grid; gap: 0.4rem;">
+                            <p class="eyebrow" th:text="${wishlistItem.variant.variantLabel}">Size / Colour</p>
+                            <h3 style="margin: 0;" th:text="${wishlistItem.variant.product.name}">Product Name</h3>
+                        </div>
+
+                        <!-- Remove actions -->
+                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                            <!-- Remove form  -->
+                            <form th:action="@{/wishlist/remove}" method="post">
+                                <input type="hidden" name="wishlistItemID" th:value="${wishlistItem.wishlistItemID}">
+                                <button type="submit" class="button-secondary" style="color: #8d2415;">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products page button -->
+                <div class="surface-panel" style="display: flex; justify-content: flex-end;">
+                    <a th:href="@{/products}" class="button-primary">Proceed to Products Page -></a>
+                </div>
+            </div>
+        </main>
+
+        <footer style="text-align: center; padding: 2rem; color:var(--customer-muted); font-size:0.9rem">
+            BUSANA.my &copy; 2025
+        </footer>
+
+        <script th:src="@{/js/customer.js}" async defer></script>
+    </body>
+</html>

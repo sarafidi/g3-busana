@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">BUSANA.my</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 80px auto; padding: 0 1rem; }
+        h1 { font-size: 1.8rem; }
+        .success { background: #e6f4ea; color: #1a6630; padding: 12px 16px; border-radius: 8px; }
+        .info { background: #e8f0fe; color: #1a3669; padding: 12px 16px; border-radius: 8px; margin-top: 12px; }
+        nav { margin-bottom: 2rem; }
+        nav a { margin-right: 1rem; color: #333; text-decoration: none; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a th:href="@{/}">Home</a>
+    <a th:href="@{/customer/test}">Test</a>
+    <a th:href="@{/customer/login}">Login</a>
+    <a th:href="@{/customer/register}">Register</a>
+    <a th:href="@{/admin/login}">Admin Login</a>
+</nav>
+
+<h1 th:text="${pageTitle}">BUSANA.my</h1>
+
+<p th:if="${successMessage}" class="success" th:text="${successMessage}"></p>
+<p th:if="${errorMessage}" class="info" th:text="${errorMessage}"></p>
+
+<div class="info">
+    <strong>Stack check:</strong><br>
+    Spring Boot ✓ &nbsp;|&nbsp; Thymeleaf ✓ &nbsp;|&nbsp; MySQL ✓
+</div>
+
+</body>
+</html>
