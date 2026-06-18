@@ -33,11 +33,7 @@ public class TestController {
     // visit http://localhost:8080/ to test this
     @GetMapping("/")
     public String home(Model model) {
-        // pass data to HTML template
-        model.addAttribute("pageTitle", "Welcome to BUSANA.my");
-        model.addAttribute("successMessage", "SpringBoot + Thymeleaf + MySQL is working correctly!");
-
-        // returns templates/customer/home.html
+        model.addAttribute("pageTitle", "Universal Sign In | BUSANA.my");
         return "index";
     }
     
