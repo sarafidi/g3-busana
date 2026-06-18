@@ -3,24 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BUSANA.my</title>
+    <title th:text="${pageTitle}">BUSANA.my</title>
     <style>
-        body { font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #eef2ff; }
-        .placeholder { text-align: center; padding: 40px 36px; background: #ffffff; border-radius: 20px; box-shadow: 0 24px 80px rgba(113, 125, 168, 0.16); max-width: 640px; }
-        h1 { margin: 0 0 16px; font-size: 2.2rem; color: #2c3e50; }
-        p { margin: 0 0 24px; color: #4b5563; line-height: 1.6; }
-        .actions a { display: inline-block; margin: 0 8px; padding: 12px 24px; border-radius: 999px; text-decoration: none; color: #ffffff; background: #4f46e5; font-weight: 600; }
-        .actions a.secondary { background: #6b7280; }
+        body { font-family: sans-serif; max-width: 600px; margin: 80px auto; padding: 0 1rem; }
+        h1 { font-size: 1.8rem; }
+        .success { background: #e6f4ea; color: #1a6630; padding: 12px 16px; border-radius: 8px; }
+        .info { background: #e8f0fe; color: #1a3669; padding: 12px 16px; border-radius: 8px; margin-top: 12px; }
+        nav { margin-bottom: 2rem; }
+        nav a { margin-right: 1rem; color: #333; text-decoration: none; font-weight: 500; }
     </style>
 </head>
 <body>
-    <div class="placeholder">
-        <h1>BUSANA.my is coming soon</h1>
-        <p>This page is a placeholder for the home screen. Replace this content with your app's main customer-facing landing page when you're ready.</p>
-        <div class="actions">
-            <a th:href="@{/customer/login}">Customer Login</a>
-            <a th:href="@{/customer/register}" class="secondary">Register</a>
-        </div>
-    </div>
+
+<nav>
+    <a th:href="@{/}">Home</a>
+    <a th:href="@{/customer/test}">Test</a>
+    <a th:href="@{/customer/login}">Login</a>
+    <a th:href="@{/customer/register}">Register</a>
+    <a th:href="@{/admin/login}">Admin Login</a>
+</nav>
+
+<h1 th:text="${pageTitle}">BUSANA.my</h1>
+
+<p th:if="${successMessage}" class="success" th:text="${successMessage}"></p>
+<p th:if="${errorMessage}" class="info" th:text="${errorMessage}"></p>
+
+<div class="info">
+    <strong>Stack check:</strong><br>
+    Spring Boot ✓ &nbsp;|&nbsp; Thymeleaf ✓ &nbsp;|&nbsp; MySQL ✓
+</div>
+
 </body>
 </html>

@@ -5,8 +5,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.busana.service.DBConnection;
-
 /* 
     ===============================================================
     HOW TO CREATE A CONTROLLER
@@ -31,8 +29,6 @@ import com.busana.service.DBConnection;
 
 @Controller
 public class TestController {
-
-    DBConnection dbConnection = DBConnection.getInstance(); // test DB connection on controller load
     
     // visit http://localhost:8080/ to test this
     @GetMapping("/")
@@ -42,7 +38,7 @@ public class TestController {
         model.addAttribute("successMessage", "SpringBoot + Thymeleaf + MySQL is working correctly!");
 
         // returns templates/customer/home.html
-        return "customer/home";
+        return "index";
     }
     
     @GetMapping("/test")
@@ -50,7 +46,7 @@ public class TestController {
         // visit http://localhost:8080/test to see a plain confirmation
         model.addAttribute("pageTitle", "Stack Test");
         model.addAttribute("successMessage", "Controller -> Service -> Repository chain is ready");
-        return "customer/home";
+        return "index";
     }
     
 }

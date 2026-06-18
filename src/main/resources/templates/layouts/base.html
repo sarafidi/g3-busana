@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!--
+  home.html — Customer Home (logged-in, personalized)
+  Extends layouts/base.html via Thymeleaf Layout Dialect.
+
+  Model attributes expected (set by AuthController#homeCustomer):
+    customerName     -> String, session greeting
+    featuredProducts -> List<Product>, capped at 8 by controller
+    categories        -> List<Category>, for quick-link pills
+
+  Product fields used (per Product.java):
+    productID, name, basePrice, images, category.categoryName
+-->
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" th:href="@{/css/customer.css}" />
+    <title layout:title-pattern="$CONTENT_TITLE | BUSANA.my">Home</title>
+</head>
+
+<body class="m-8 customer-shell">
+
+<main layout:fragment="content">
+
+    <!-- ── Hero / greeting ──────────────────────────────── -->
+    <section class="mb-12 rounded-2xl bg-stone-900 px-8 py-12 sm:px-12 sm:py-16
+                     flex flex-col gap-3">
+        <p class="text-amber-400 text-sm font-medium tracking-wide uppercase">
+            Welcome back
+        </p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-white tracking-tight"
+            th:text="'Hi, ' + (${customerName} ?: 'there') + '.'">
+            Hi, there.
+        </h1>
+        <p class="text-stone-300 text-sm sm:text-base max-w-xl">
+            New arrivals are in. Browse the latest pieces curated for you below,
+            or jump straight to a category.
+        </p>
+        <a th:href="@{/customer/products}"
+           class="mt-4 inline-flex w-fit items-center gap-2 bg-amber-500 text-stone-900
+                text-sm font-semibold px-6 py-2.5 rounded-full
+                hover:bg-amber-400 transition-colors duration-150">
+            Browse full catalogue
+        </a>
+    </section>
+
+    <!-- ── Category quick links ────────────────────────────── -->
+    <section class="mb-12" th:if="${categories != null and !categories.isEmpty()}">
+        <h2 class="text-sm font-semibold text-stone-900 uppercase tracking-wider mb-4">
+            Shop by category
+        </h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <a th:each="category : ${categories}"
+               th:href="@{/customer/products(categoryId=${category.categoryID})}"
+               class="rounded-xl border border-stone-200 bg-white px-5 py-6
+                  flex flex-col gap-1 hover:border-amber-400 hover:shadow-sm
+                  transition-all duration-150">
+          <span class="font-medium text-stone-900"
+                th:text="${category.categoryName}">Category</span>
+                <span class="text-xs text-stone-400"
+                      th:text="${category.description}">Description</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ── Featured products grid ──────────────────────────── -->
+    <section>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-stone-900 uppercase tracking-wider">
+                Featured for you
+            </h2>
+            <a th:href="@{/customer/products}"
+               class="text-sm text-stone-500 hover:text-stone-900 transition-colors duration-150">
+                View all →
+            </a>
+        </div>
+
+        <!-- Empty state: no products yet -->
+        <div th:if="${featuredProducts == null or featuredProducts.isEmpty()}"
+             class="flex flex-col items-center justify-center py-20 text-center
+                  rounded-xl border border-dashed border-stone-200">
+            <p class="text-stone-400 text-sm">
+                No products available right now. Check back soon!
+            </p>
+        </div>
+
+        <!-- Product grid -->
+        <div th:if="${featuredProducts != null and !featuredProducts.isEmpty()}"
+             class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+
+            <a th:each="product : ${featuredProducts}"
+               th:href="@{/customer/products/{id}(id=${product.productID})}"
+               class="group rounded-xl border border-stone-200 bg-white overflow-hidden
+                  hover:shadow-md transition-shadow duration-150">
+
+                <!-- Image / placeholder -->
+                <div class="aspect-square bg-stone-100 flex items-center justify-center
+                      text-stone-300 overflow-hidden">
+                    <img th:if="${product.images != null and !product.images.isBlank()}"
+                         th:src="${product.images}"
+                         th:alt="${product.name}"
+                         class="w-full h-full object-cover group-hover:scale-105
+                        transition-transform duration-200" />
+                    <svg th:unless="${product.images != null and !product.images.isBlank()}"
+                         class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.5"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159
+                       5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909
+                       2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0
+                       00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5z"/>
+                    </svg>
+                </div>
+
+                <!-- Details -->
+                <div class="p-3.5">
+                    <p class="text-xs text-stone-400 mb-0.5"
+                       th:text="${product.category?.categoryName}">Category</p>
+                    <p class="text-sm font-medium text-stone-900 truncate"
+                       th:text="${product.name}">Product name</p>
+                    <p class="text-sm font-semibold text-stone-900 mt-1.5">
+                        RM <span th:text="${#numbers.formatDecimal(product.basePrice, 1, 2)}">0.00</span>
+                    </p>
+                </div>
+
+            </a>
+
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>

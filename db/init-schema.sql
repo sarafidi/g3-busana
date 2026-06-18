@@ -17,7 +17,7 @@ CREATE TABLE Customer (
     password VARCHAR(20) NOT NULL,
     deliveryAddress VARCHAR(255) NOT NULL,
     PRIMARY KEY (customerID)
-)
+);
 
 -- 2. Admin Table
 CREATE TABLE Admin (
@@ -26,7 +26,7 @@ CREATE TABLE Admin (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(20) NOT NULL,
     PRIMARY KEY (adminID)
-)
+);
 
 -- 3. Category Table
 CREATE TABLE Category (
@@ -34,7 +34,7 @@ CREATE TABLE Category (
     categoryName VARCHAR(100) NOT NULL,
     description VARCHAR(255),
     PRIMARY KEY (categoryID)
-)
+);
 
 -- ======================================================
 -- SECTION 2: CORE PRODUCTS AND INVENTORY TABLE
@@ -52,7 +52,7 @@ CREATE TABLE Product (
     status VARCHAR(20) NOT NULL,
     PRIMARY KEY (productID),
     Foreign Key (categoryID) REFERENCES Category(categoryID) ON DELETE CASCADE
-)
+);
 
 -- 5. Product Variant Table (Variant sizes/colours inventory)
 CREATE TABLE ProductVariant (
@@ -63,7 +63,7 @@ CREATE TABLE ProductVariant (
     stockLevel INT NOT NULL DEFAULT 0,
     PRIMARY KEY(variantID),
     Foreign Key (productID) REFERENCES Product(productID) ON DELETE CASCADE
-)
+);
 
 -- ======================================================
 -- SECTION 3: TRANSITION & RELATIONAL TABLES
@@ -75,7 +75,7 @@ CREATE TABLE Wishlist (
     customerID VARCHAR(20) NOT NULL,
     PRIMARY KEY(wishlistID),
     Foreign Key (customerID) REFERENCES Customer(customerID) ON DELETE CASCADE
-)
+);
 
 -- 7. Wishlist Item Table
 CREATE TABLE WishlistItem (
@@ -83,7 +83,7 @@ CREATE TABLE WishlistItem (
     variantID VARCHAR(20) NOT NULL,
     PRIMARY KEY(wishlistItemID),
     Foreign Key (variantID) REFERENCES ProductVariant(variantID) ON DELETE CASCADE
-)
+);
 
 -- 8. Shopping Cart Table
 CREATE TABLE ShoppingCart (
@@ -91,7 +91,7 @@ CREATE TABLE ShoppingCart (
     customerID VARCHAR(20) NOT NULL,
     PRIMARY KEY(cartID),
     Foreign Key (customerID) REFERENCES Customer(customerID) ON DELETE CASCADE
-)
+);
 
 -- 9. Cart Item Table
 CREATE TABLE CartItem (
@@ -103,7 +103,7 @@ CREATE TABLE CartItem (
     PRIMARY KEY(cartItemID),
     Foreign Key (cartID) REFERENCES ShoppingCart(cartID) ON DELETE CASCADE,
     Foreign Key (variantID) REFERENCES ProductVariant(variantID) ON DELETE CASCADE
-)
+);
 
 -- 10. Promotion Table
 CREATE TABLE Promotion (
@@ -116,7 +116,7 @@ CREATE TABLE Promotion (
     endDate DATE NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'active',
     PRIMARY KEY (promotionID)
-)
+);
 
 -- ======================================================
 -- SECTION 4: TRANSACTION & SYSTEM NOTIFICATION
@@ -136,7 +136,7 @@ CREATE TABLE `Order` (
     PRIMARY KEY(orderID),
     Foreign Key (customerID) REFERENCES Customer(customerID) ON DELETE CASCADE,
     Foreign Key (promotionID) REFERENCES Promotion(promotionID) ON DELETE CASCADE
-)
+);
 
 -- 12. Order Item Table
 CREATE TABLE OrderItem (
@@ -148,7 +148,7 @@ CREATE TABLE OrderItem (
     PRIMARY KEY(orderItemID),
     Foreign Key (orderID) REFERENCES `Order`(orderID) ON DELETE CASCADE,
     Foreign Key (variantID) REFERENCES ProductVariant(variantID) ON DELETE CASCADE
-)
+);
 
 -- 13. Notification
 CREATE TABLE Notification (
@@ -160,4 +160,14 @@ CREATE TABLE Notification (
     PRIMARY KEY(notificationID),
     Foreign Key (orderID) REFERENCES `Order`(orderID) ON DELETE CASCADE,
     Foreign Key (customerID) REFERENCES Customer(customerID) ON DELETE CASCADE
-)
+);
+
+# Add wishlistID as FK into wishlistItem table
+ALTER TABLE WishlistItem ADD COLUMN wishlistID VARCHAR(20) NOT NULL;
+ALTER TABLE WishlistItem ADD FOREIGN KEY (wishlistID)
+    REFERENCES Wishlist(wishlistID) ON DELETE CASCADE;
+
+
+# Change Customer and Admin table -> password properties
+ALTER TABLE Customer MODIFY password VARCHAR(255) NOT NULL;
+ALTER TABLE Admin MODIFY password VARCHAR(255) NOT NULL;
