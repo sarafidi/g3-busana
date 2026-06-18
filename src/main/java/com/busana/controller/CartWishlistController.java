@@ -3,6 +3,7 @@ package com.busana.controller;
 import com.busana.model.*;
 import com.busana.service.CartWishlistService;
 import com.busana.service.CartWishlistService.CheckoutResult;
+import com.busana.service.OrderService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,9 @@ import java.util.List;
 public class CartWishlistController {
     @Autowired
     private CartWishlistService cartWishlistService;
+    
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping({"/cart", "/customer/cart"})
     public String viewCart(HttpSession session, Model model) {
@@ -179,17 +183,13 @@ public class CartWishlistController {
             // Delegate Strategy selection and calculation to Service
             CheckoutResult checkoutResult = cartWishlistService.calculateCheckout(cartItems, shippingMethod);
 
+            // Create and store Order in the database
+            Order order = orderService.placeOrder(customerID, cartItems, checkoutResult.shippingFee(), checkoutResult.totalAmount(), deliveryAddress);
+
             // Clear Cart items
             cartWishlistService.clearCart(customerID);
 
-            // Pass variables via Flash Attributes
-            redirectAttributes.addFlashAttribute("deliveryAddress", deliveryAddress);
-            redirectAttributes.addFlashAttribute("shippingMethod", shippingMethod);
-            redirectAttributes.addFlashAttribute("shippingFee", checkoutResult.shippingFee());
-            redirectAttributes.addFlashAttribute("subtotal", checkoutResult.subtotal());
-            redirectAttributes.addFlashAttribute("totalAmount", checkoutResult.totalAmount());
-
-            return "redirect:/order/confirm";
+            return "redirect:/customer/order-confirmation/" + order.getOrderID();
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/checkout";

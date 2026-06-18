@@ -2,6 +2,7 @@ package com.busana.controller;
 
 import org.springframework.stereotype.Controller;
 
+import java.math.BigDecimal;
 import org.springframework.ui.Model;
 
 import com.busana.model.Order;
@@ -56,8 +57,24 @@ public class OrderController {
     ) {
         try {
             Order order = orderService.getOrderByOrderID(orderId);
-            model.addAttribute("pageTitle", "Order Confirmation for ORder: " + order.getOrderID());
+            model.addAttribute("pageTitle", "Order Confirmation for Order: " + order.getOrderID());
             model.addAttribute("order", order);
+            
+            // Populate individual fields for customer/order-confirmation.html
+            model.addAttribute("deliveryAddress", order.getDeliveryAddress());
+            model.addAttribute("shippingFee", order.getShippingFee());
+            model.addAttribute("totalAmount", order.getTotalAmount());
+            model.addAttribute("subtotal", order.getTotalAmount().subtract(order.getShippingFee()));
+            
+            // Deduce shipping method from shipping fee
+            String method = "Standard";
+            if (order.getShippingFee().compareTo(BigDecimal.valueOf(15.00)) == 0) {
+                method = "Express";
+            } else if (order.getShippingFee().compareTo(BigDecimal.valueOf(30.00)) == 0) {
+                method = "Same-day Courier";
+            }
+            model.addAttribute("shippingMethod", method);
+            
             return "customer/order-confirmation";
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());

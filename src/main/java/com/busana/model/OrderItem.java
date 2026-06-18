@@ -69,6 +69,9 @@ public class OrderItem {
     public void getsubtotal(BigDecimal subtotal) {
         this.subtotal = subtotal;
     }
+    public void setSubtotal(BigDecimal subtotal) {
+        this.subtotal = subtotal;
+    }
 
 }
 
