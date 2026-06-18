@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "`Order`")   //prevents SQL conflicts with the "ORDER BY" statement     // must match SQL table name
+@Table(name = "`Order`")
 public class Order {
     
     @Id
@@ -21,28 +21,31 @@ public class Order {
     @JoinColumn(name = "promotionID")
     private Promotion promotion;
 
-    @Column(name = "orderDate", nullable = false)     // order should have date AND time imo
+    @Column(name = "orderDate", nullable = false)
     private LocalDate orderDate; 
 
     @Column(name = "orderStatus", length = 20, nullable = false)     
     private String orderStatus = "Pending";
 
     @Column(name = "shippingFee", precision = 10, scale = 2, nullable = false)     
-    private BigDecimal shippingFee = BigDecimal.ZERO; //avoiding object instantiation
+    private BigDecimal shippingFee = BigDecimal.ZERO;
     @Column(name = "totalAmount", precision = 10, scale = 2, nullable = false)     
     private BigDecimal totalAmount = BigDecimal.ZERO;
 
 
-    @Column(name = "deliveryAddress", length = 255)     // nullable = true by default
+    @Column(name = "deliveryAddress", length = 255)
     private String deliveryAddress;
 
     @Column(name = "paymentStatus", length = 20, nullable = false)     
     private String paymentStatus = "Pending";
 
-    // --- Constructor --------------------------
-    public Order() {}        // always include an empty constructor for JPA
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private java.util.List<OrderItem> orderItems;
 
-    // --- Getter & Setters --------------------------
+    public Order() {}
+
+    public java.util.List<OrderItem> getOrderItems() { return orderItems; }
+    public void setOrderItems(java.util.List<OrderItem> orderItems) { this.orderItems = orderItems; }
 
     public String getOrderID() { return orderID; }
     public void setOrderID(String orderID) {

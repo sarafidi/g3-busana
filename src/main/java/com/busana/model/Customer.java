@@ -21,10 +21,8 @@ public class Customer {
     @Column(name = "deliveryAddress", length = 255, nullable = false)
     private String deliveryAddress;
 
-    //Constructor
     public Customer() {}
 
-    //Getters and Setters
     public String getCustomerID() {
         return customerID;
     }

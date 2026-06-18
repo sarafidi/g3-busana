@@ -193,6 +193,40 @@ public class CartWishlistService {
         return wishlistItemRepository.save(newWishlistItem);
     }
 
+    public boolean toggleWishlist(String customerID, String variantID) {
+        ProductVariant variant = productVariantRepository.findById(variantID)
+                .orElseThrow(() -> new RuntimeException("Variant not found!"));
+
+        Wishlist wishlist = wishlistRepository.findByCustomer_CustomerID(customerID)
+                .orElseGet(() -> {
+                    Customer customer = new Customer();
+                    customer.setCustomerID(customerID);
+                    Wishlist newWishlist = new Wishlist("WI-" + customerID, customer);
+                    return wishlistRepository.save(newWishlist);
+                });
+
+        List<WishlistItem> wishlistItems = wishlistItemRepository.findByWishlist_WishlistID(wishlist.getWishlistID());
+        Optional<WishlistItem> existingItem = wishlistItems.stream()
+                .filter(item -> item.getVariant().getVariantID().equalsIgnoreCase(variantID))
+                .findFirst();
+
+        if (existingItem.isPresent()) {
+            wishlistItemRepository.delete(existingItem.get());
+            return true; // removed
+        } else {
+            if (!variant.isAvailable())
+                throw new RuntimeException("Variant is not in stock!");
+
+            WishlistItem newWishlistItem = new WishlistItem(
+                    "WI-" + System.currentTimeMillis(),
+                    wishlist,
+                    variant
+            );
+            wishlistItemRepository.save(newWishlistItem);
+            return false; // added
+        }
+    }
+
     /*
         removes a product variant from customer's wishlist,
         check if wishlist item exists before attempting deletion

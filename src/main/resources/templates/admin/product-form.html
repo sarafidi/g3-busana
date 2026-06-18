@@ -3,148 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle}">Product Form</title>
+    <title th:text="${pageTitle}">Product Form | BUSANA.my</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Instrument Sans & Prata -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Instrument Sans', sans-serif;
+            background-color: #fffbf6;
+            color: #2d201a;
+        }
+        .serif-font {
+            font-family: 'Prata', serif;
+        }
+        
+        .spotlight {
+            outline: 2px solid #b4572d;
+            outline-offset: 4px;
+        }
+    </style>
+    <!-- Keep script defer tag -->
     <script defer th:src="@{/js/admin.js}"></script>
 </head>
-<body class="admin-shell">
-    <header class="admin-topbar">
-        <div>
-            <p class="eyebrow">Admin Panel</p>
-            <h1 th:text="${pageTitle}">Add Product</h1>
-        </div>
-        <div class="button-row">
-            <a class="button-secondary" th:href="@{/admin/products}">Back to Catalogue</a>
-        </div>
-    </header>
+<body class="min-h-screen flex bg-[#fffbf6]">
 
-    <main class="admin-main">
-        <section class="surface-panel form-banner">
+    <!-- Sidebar Navigation -->
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar('catalogue')}"></aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow p-8 max-w-4xl mx-auto overflow-y-auto">
+        
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-8 pb-6 border-b border-[#3f291f]/5">
             <div>
-                <p class="eyebrow">Factory Method Workflow</p>
-                <h2 th:text="${formMode == 'create'} ? 'Create a new catalogue item' : 'Update an existing catalogue item'">Create a new catalogue item</h2>
+                <span class="text-[10px] uppercase tracking-wider font-extrabold text-[#b4572d]" th:text="${formMode == 'create'} ? 'New Product' : 'Modify Product'">Operations</span>
+                <h2 class="text-3xl font-bold text-[#2d201a] tracking-tight mt-0.5" th:text="${pageTitle}">Product Form</h2>
             </div>
-            <p class="muted-text">
-                Products are instantiated through category-specific factories so Tops, Bottoms, and Accessories follow the assignment pattern cleanly.
-            </p>
-        </section>
+            
+            <a th:href="@{/admin/products}" class="inline-flex items-center gap-2 bg-white hover:bg-stone-50 border border-[#3f291f]/10 text-stone-600 text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                Back to Catalogue
+            </a>
+        </header>
 
-        <section class="surface-panel" th:if="${errorMessage}">
-            <p class="feedback error" th:text="${errorMessage}"></p>
-        </section>
+        <!-- Messages -->
+        <div th:if="${errorMessage}" class="mb-6 p-4 rounded-2xl bg-[#fff5eb] border border-red-200 text-red-700 text-sm font-medium flex gap-3 items-center">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+            </svg>
+            <span th:text="${errorMessage}">Error Message</span>
+        </div>
 
-        <form
-            class="product-form"
-            th:object="${productForm}"
-            method="post"
-            th:action="${formAction}">
-
-            <section class="surface-panel form-section">
-                <div class="section-heading">
-                    <p class="eyebrow">Product Details</p>
-                    <h2>Descriptive information</h2>
+        <!-- Product Form -->
+        <form class="space-y-8" th:object="${productForm}" method="post" th:action="${formAction}">
+            
+            <!-- Details Card -->
+            <div class="bg-white border border-[#3f291f]/10 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-[#2d201a]">Product Details</h3>
+                    <p class="text-xs text-[#6e5a4e] mt-0.5">Primary information, pricing, and materials.</p>
                 </div>
 
-                <div class="form-grid">
-                    <label>
-                        <span>Product ID</span>
-                        <input type="text" th:value="${productId}" placeholder="Auto-generated on save" readonly>
-                    </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-[#6e5a4e]">Product ID</label>
+                        <input type="text" th:value="${productId}" placeholder="Auto-generated on save" readonly
+                               class="w-full px-4 py-2.5 rounded-xl border border-[#3f291f]/10 bg-[#fff5eb]/40 text-stone-400 text-sm font-medium focus:outline-none">
+                    </div>
 
-                    <label>
-                        <span>Status</span>
-                        <select th:field="*{status}">
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-[#6e5a4e]">Publishing Status</label>
+                        <select th:field="*{status}" class="w-full px-4 py-2.5 rounded-xl border border-[#3f291f]/15 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d] text-sm font-medium">
+                            <option value="active">Active (Visible)</option>
+                            <option value="inactive">Inactive (Hidden)</option>
                         </select>
-                    </label>
+                    </div>
 
-                    <label>
-                        <span>Product name</span>
-                        <input type="text" th:field="*{name}" placeholder="Classic Oversized Tee" required>
-                    </label>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-[#6e5a4e]">Product Name</label>
+                        <input type="text" th:field="*{name}" placeholder="e.g. Silk Batik Shirt" required
+                               class="w-full px-4 py-2.5 rounded-xl border border-[#3f291f]/15 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d] text-sm font-medium">
+                    </div>
 
-                    <label>
-                        <span>Category</span>
-                        <select th:field="*{categoryId}" required>
-                            <option value="">Choose a category</option>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-[#6e5a4e]">Category</label>
+                        <select th:field="*{categoryId}" required class="w-full px-4 py-2.5 rounded-xl border border-[#3f291f]/15 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d] text-sm font-medium">
+                            <option value="">Choose a Category</option>
                             <option th:each="category : ${categories}" th:value="${category.categoryID}" th:text="${category.categoryName}"></option>
                         </select>
-                    </label>
+                    </div>
 
-                    <label>
-                        <span>Base price (RM)</span>
-                        <input type="number" min="0" step="0.01" th:field="*{basePrice}" placeholder="79.90" required>
-                    </label>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-[#6e5a4e]">Base Price (RM)</label>
+                        <input type="number" min="0" step="0.01" th:field="*{basePrice}" placeholder="89.90" required
+                               class="w-full px-4 py-2.5 rounded-xl border border-[#3f291f]/15 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d] text-sm font-medium">
+                    </div>
 
-                    <label>
-                        <span>Fabric type</span>
-                        <input type="text" th:field="*{fabricType}" placeholder="Cotton Twill" required>
-                    </label>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-[#6e5a4e]">Fabric Type</label>
+                        <input type="text" th:field="*{fabricType}" placeholder="e.g. 100% Premium Cotton" required
+                               class="w-full px-4 py-2.5 rounded-xl border border-[#3f291f]/15 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d] text-sm font-medium">
+                    </div>
                 </div>
 
-                <label>
-                    <span>Image path or URL list</span>
-                    <input type="text" th:field="*{images}" placeholder="Lookbook image paths separated by commas">
-                </label>
-
-                <label>
-                    <span>Description</span>
-                    <textarea th:field="*{description}" rows="5" maxlength="255" placeholder="Share the fit, texture, and styling notes for this piece." required></textarea>
-                </label>
-            </section>
-
-            <section class="surface-panel form-section" id="variant-section" th:classappend="${focusSection == 'stock'} ? ' spotlight' : ''">
-                <div class="section-heading">
-                    <p class="eyebrow">Variant Inventory</p>
-                    <h2>Size, colour, and stock availability</h2>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-[#6e5a4e]">Image Path or URL List</label>
+                    <input type="text" th:field="*{images}" placeholder="Lookbook paths separated by commas, e.g. /images/batik-red.jpg"
+                           class="w-full px-4 py-2.5 rounded-xl border border-[#3f291f]/15 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d] text-sm font-medium">
                 </div>
 
-                <div class="form-tips">
-                    <p>At least one size and colour combination is required.</p>
-                    <p>Stock values must be non-negative integers.</p>
-                    <p>Use one row per unique size and colour combination.</p>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-[#6e5a4e]">Product Description</label>
+                    <textarea th:field="*{description}" rows="4" maxlength="255" required placeholder="Describe the silhouette, fit notes, fabric feel, and details."
+                              class="w-full px-4 py-2.5 rounded-xl border border-[#3f291f]/15 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d] text-sm font-medium"></textarea>
+                </div>
+            </div>
+
+            <!-- Variant Section -->
+            <div class="bg-white border border-[#3f291f]/10 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6" id="variant-section" th:classappend="${focusSection == 'stock'} ? ' spotlight' : ''">
+                <div>
+                    <h3 class="text-lg font-bold text-[#2d201a]">Variant Inventory</h3>
+                    <p class="text-xs text-[#6e5a4e] mt-0.5">Specify size, colour, and stock counts. Low stock alerts are flagged if counts fall below 5.</p>
                 </div>
 
-                <div class="variant-editor" data-variant-editor th:attr="data-next-index=${productForm.variants.size()}">
-                    <div class="variant-editor-head">
+                <!-- Custom Grid Table -->
+                <div class="space-y-3.5">
+                    <div class="grid grid-cols-4 gap-4 px-2 text-xs uppercase font-extrabold text-[#6e5a4e] border-b border-[#3f291f]/5 pb-2">
                         <span>Size</span>
                         <span>Colour</span>
-                        <span>Stock</span>
-                        <span>Action</span>
+                        <span>Stock Level</span>
+                        <span class="text-right">Action</span>
                     </div>
 
-                    <div
-                        class="variant-editor-row"
-                        th:each="variant, variantStat : *{variants}">
-                        <input type="hidden" th:field="*{variants[__${variantStat.index}__].variantId}">
-                        <input type="text" th:field="*{variants[__${variantStat.index}__].size}" placeholder="M" maxlength="5">
-                        <input type="text" th:field="*{variants[__${variantStat.index}__].colour}" placeholder="Black" maxlength="20">
-                        <input type="number" min="0" step="1" th:field="*{variants[__${variantStat.index}__].stockLevel}" placeholder="0">
-                        <button class="button-ghost" type="button" data-remove-variant>Remove</button>
+                    <!-- Dynamic Row Holder -->
+                    <div class="space-y-3 variant-editor" data-variant-editor th:attr="data-next-index=${productForm.variants.size()}">
+                        
+                        <div class="grid grid-cols-4 gap-4 items-center variant-editor-row bg-[#fff5eb]/10 p-2.5 rounded-2xl border border-[#3f291f]/5"
+                             th:each="variant, variantStat : *{variants}">
+                            <input type="hidden" th:field="*{variants[__${variantStat.index}__].variantId}">
+                            
+                            <input type="text" th:field="*{variants[__${variantStat.index}__].size}" placeholder="e.g. M" maxlength="5" required
+                                   class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-[#3f291f]/10 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d]">
+                            
+                            <input type="text" th:field="*{variants[__${variantStat.index}__].colour}" placeholder="e.g. Emerald" maxlength="20" required
+                                   class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-[#3f291f]/10 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d]">
+                            
+                            <input type="number" min="0" step="1" th:field="*{variants[__${variantStat.index}__].stockLevel}" placeholder="0" required
+                                   class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-[#3f291f]/10 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d]">
+                            
+                            <div class="text-right">
+                                <button type="button" data-remove-variant class="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Variant Row Template (used by js/admin.js) -->
                 <template id="variant-row-template">
-                    <div class="variant-editor-row">
+                    <div class="grid grid-cols-4 gap-4 items-center variant-editor-row bg-[#fff5eb]/10 p-2.5 rounded-2xl border border-[#3f291f]/5">
                         <input type="hidden" name="variants[__INDEX__].variantId" value="">
-                        <input type="text" name="variants[__INDEX__].size" placeholder="M" maxlength="5">
-                        <input type="text" name="variants[__INDEX__].colour" placeholder="Black" maxlength="20">
-                        <input type="number" min="0" step="1" name="variants[__INDEX__].stockLevel" placeholder="0">
-                        <button class="button-ghost" type="button" data-remove-variant>Remove</button>
+                        
+                        <input type="text" name="variants[__INDEX__].size" placeholder="e.g. M" maxlength="5" required
+                               class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-[#3f291f]/10 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d]">
+                        
+                        <input type="text" name="variants[__INDEX__].colour" placeholder="e.g. Emerald" maxlength="20" required
+                               class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-[#3f291f]/10 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d]">
+                        
+                        <input type="number" min="0" step="1" name="variants[__INDEX__].stockLevel" placeholder="0" required
+                               class="w-full px-3 py-2 text-xs font-bold rounded-xl border border-[#3f291f]/10 bg-[#fffbf6] focus:outline-none focus:border-[#b4572d]">
+                        
+                        <div class="text-right">
+                            <button type="button" data-remove-variant class="px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition">
+                                Remove
+                            </button>
+                        </div>
                     </div>
                 </template>
 
-                <button class="button-secondary" type="button" data-add-variant>Add Variant Row</button>
-            </section>
+                <button class="inline-flex items-center gap-1.5 py-2 px-4 bg-[#fffbf6] hover:bg-[#fff5eb] border border-[#3f291f]/10 text-xs font-bold text-stone-600 rounded-xl transition" 
+                        type="button" data-add-variant>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add Variant Row
+                </button>
+            </div>
 
-            <section class="form-actions">
-                <button class="button-primary" type="submit" th:text="${formMode == 'create'} ? 'Create Product' : 'Save Changes'">Create Product</button>
-                <a class="button-secondary" th:href="@{/admin/products}">Cancel</a>
-            </section>
+            <!-- Form Actions -->
+            <div class="flex gap-3 pt-4 border-t border-[#3f291f]/5">
+                <button class="py-3 px-6 bg-[#b4572d] hover:bg-[#8f3c1c] text-white text-sm font-bold rounded-xl transition shadow-md shadow-[#b4572d]/10" 
+                        type="submit" th:text="${formMode == 'create'} ? 'Create Product' : 'Save Changes'">Create Product</button>
+                <a class="py-3 px-6 bg-white border border-[#3f291f]/10 text-stone-600 text-sm font-semibold rounded-xl hover:bg-stone-50 transition" 
+                   th:href="@{/admin/products}">Cancel</a>
+            </div>
         </form>
     </main>
 </body>

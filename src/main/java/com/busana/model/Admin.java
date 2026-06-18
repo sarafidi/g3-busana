@@ -16,10 +16,8 @@ public class Admin {
     @Column(name = "password", length = 255, nullable = false)
     private String password;
 
-    //Constructor
-    public Admin() {}   
+    public Admin() {}
 
-    //Getters and Setters
     public String getAdminID() {
         return adminID;
     }   

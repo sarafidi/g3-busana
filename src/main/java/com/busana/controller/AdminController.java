@@ -19,23 +19,4 @@ public class AdminController {
         this.promotionService = promotionService;
         this.orderService = orderService;
     }
-
-    @GetMapping("/dashboard")
-    public String showDashboard(Model model) {
-        model.addAttribute("pageTitle", "Executive Dashboard");
-
-        // 1. Fetch Order Status Segment Matrices
-        model.addAttribute("totalOrders", orderService.getTotalOrderCount());
-        model.addAttribute("pendingOrders", orderService.getOrderCountByStatus("PENDING"));
-        model.addAttribute("processingOrders", orderService.getOrderCountByStatus("PROCESSING"));
-        model.addAttribute("deliveredOrders", orderService.getOrderCountByStatus("DELIVERED"));
-        model.addAttribute("cancelledOrders", orderService.getOrderCountByStatus("CANCELLED"));
-
-        // 2. Fetch Promotion Status Segment Matrices
-        model.addAttribute("totalPromotions", promotionService.getTotalPromotionsCount());
-        model.addAttribute("activePromotions", promotionService.getPromotionCountByStatus("ACTIVE"));
-        model.addAttribute("inactivePromotions", promotionService.getPromotionCountByStatus("INACTIVE"));
-
-        return "admin/dashboard";
-    }
 }

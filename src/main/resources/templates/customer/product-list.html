@@ -15,8 +15,8 @@
         <nav class="topbar-links">
             <a th:href="@{/customer/home}">Home</a>
             <a class="is-active" th:href="@{/customer/products}">Catalogue</a>
+            <a th:href="@{/wishlist}">Wishlist</a>
             <a th:href="@{/customer/cart}">My Shopping Cart</a>
-            <a th:href="@{/admin/products}">Admin View</a>
         </nav>
         <div class="profile-dropdown" th:if="${session.customerID != null}">
             <button class="profile-btn">
@@ -36,18 +36,18 @@
 
     <main class="catalogue-main">
         <section class="hero-card">
-            <p class="eyebrow">Module B · Product Catalogue</p>
+            <p class="eyebrow">Product Catalogue</p>
             <h1>Style discovery with search, category filters, and live variant visibility.</h1>
             <p class="hero-copy">
-                Browse BUSANA.my by keyword, category, size, colour, and price range just like the assignment PDF describes.
+                Browse BUSANA.my by keyword, category, size, colour, and price range with filters.
             </p>
         </section>
 
-        <section class="surface-panel" th:if="${successMessage}">
+        <section class="surface-panel" th:if="${successMessage}" style="margin-bottom: 1.5rem;">
             <p class="feedback success" th:text="${successMessage}"></p>
         </section>
 
-        <section class="surface-panel" th:if="${errorMessage}">
+        <section class="surface-panel" th:if="${errorMessage}" style="margin-bottom: 1.5rem;">
             <p class="feedback error" th:text="${errorMessage}"></p>
         </section>
 
@@ -137,8 +137,20 @@
                 </div>
 
                 <div class="product-grid" th:unless="${products.isEmpty()}">
-                    <article class="product-card" th:each="product : ${products}">
+                    <a class="product-card" th:each="product : ${products}" th:href="@{/customer/products/{productId}(productId=${product.productID})}">
                         <div class="product-card-media">
+                            <form th:action="@{/wishlist/toggle}" method="post" class="card-wishlist-form">
+                                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                 <input type="hidden" name="variantID" th:value="${product.variants != null and !product.variants.isEmpty() ? product.variants[0].variantID : ''}" />
+                                 <button type="submit" class="card-wishlist-btn" 
+                                         th:classappend="${wishlistedVariantIds != null and product.variants != null and !product.variants.isEmpty() and #lists.contains(wishlistedVariantIds, product.variants[0].variantID)} ? 'is-wishlisted' : ''"
+                                         th:title="${wishlistedVariantIds != null and product.variants != null and !product.variants.isEmpty() and #lists.contains(wishlistedVariantIds, product.variants[0].variantID)} ? 'Remove from Wishlist' : 'Add to Wishlist'"
+                                         onclick="event.stopPropagation();">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    </svg>
+                                </button>
+                            </form>
                             <img
                                 th:if="${product.primaryImage != ''}"
                                 th:src="${product.primaryImage}"
@@ -159,20 +171,15 @@
 
                             <div class="card-copy">
                                 <h3 th:text="${product.name}">Product Name</h3>
-                                <p class="muted-text" th:text="${product.description}">Product description</p>
+                                <!-- <p class="muted-text" th:text="${product.description}">Product description</p> -->
                             </div>
 
                             <div class="card-meta">
                                 <p class="price-tag" th:text="|RM ${#numbers.formatDecimal(product.basePrice, 1, 'COMMA', 2, 'POINT')}|">RM 0.00</p>
-                                <p class="variant-line" th:text="${product.variantSummary}">Black / M, White / L</p>
-                                <p class="helper-line" th:text="|Fabric: ${product.fabricType} · Total stock: ${product.totalStock}|">Fabric: Cotton · Total stock: 12</p>
+                                <p class="variant-line" th:if="${!product.variants.isEmpty()}" th:text="|Sizes: ${product.availableSizesText}|">Sizes: S, M, L</p>
                             </div>
-
-                            <a class="button-primary" th:href="@{/customer/products/{productId}(productId=${product.productID})}">
-                                View Details
-                            </a>
                         </div>
-                    </article>
+                    </a>
                 </div>
             </section>
         </section>

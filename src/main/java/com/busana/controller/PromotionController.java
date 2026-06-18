@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-// import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -44,7 +43,6 @@ public class PromotionController {
      @GetMapping("/admin/promotions/{promotionId}/edit")
     public String showEditProductForm(
         @PathVariable String promotionId,
-        // @RequestParam(required = false) String focus,
         Model model,
         RedirectAttributes redirectAttributes
     ) {
@@ -52,7 +50,6 @@ public class PromotionController {
             Promotion existingPromotion = promotionService.getPromotionByID(promotionId);
             model.addAttribute("promotion", existingPromotion);
             model.addAttribute("pageTitle", "Edit Promotion");
-            // model.addAttribute("focusSection", focus);
             return "admin/promotion-form";
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());

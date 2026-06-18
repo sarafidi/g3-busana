@@ -13,7 +13,6 @@ public class ShoppingCart {
     @JoinColumn(name = "customerID", nullable = false)
     private Customer customer;
 
-    // required by JPA to reconstruct obj from DB rows
     public ShoppingCart() { }
 
     public ShoppingCart(String cartID, Customer customer) {

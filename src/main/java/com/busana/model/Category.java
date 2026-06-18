@@ -24,7 +24,7 @@ import jakarta.persistence.*;
 */
 
 @Entity
-@Table(name = "Category")       // must match SQL table name
+@Table(name = "Category")
 public class Category {
     
     @Id
@@ -34,7 +34,7 @@ public class Category {
     @Column(name = "categoryName", length = 100, nullable = false)
     private String categoryName;
     
-    @Column(name = "description", length = 255)     // nullable = true by default
+    @Column(name = "description", length = 255)
     private String description;
 
     // --- Constructor --------------------------

@@ -43,10 +43,7 @@ public class Product {
     @OrderBy("colour ASC, size ASC")
     private List<ProductVariant> variants = new ArrayList<>();
 
-    // --- Constructor --------------------------
     public Product() {}
-
-    // --- Getter & Setters --------------------------
 
     public String getProductID() { return productID; }
     public void setProductID(String productID) { this.productID = productID; }

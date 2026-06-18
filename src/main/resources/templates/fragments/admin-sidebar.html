@@ -1,0 +1,54 @@
+<!-- templates/fragments/admin-sidebar.html -->
+<aside th:fragment="sidebar(activeLink)" class="w-64 bg-[#2d201a] text-white flex flex-col justify-between rounded-r-[32px] shadow-xl z-20 min-h-screen shrink-0">
+    <div class="p-8">
+        <!-- Brand wordmark logo -->
+        <div class="mb-10 text-center lg:text-left">
+            <h1 class="text-3xl font-normal serif-font tracking-widest bg-gradient-to-r from-amber-200 via-amber-100 to-white bg-clip-text text-transparent">
+                BUSANA
+            </h1>
+            <p class="text-[10px] text-amber-200/50 uppercase tracking-widest font-semibold mt-1">Console</p>
+        </div>
+        
+        <!-- Navigation Links -->
+        <nav class="space-y-2">
+            <a th:href="@{/admin/dashboard}" 
+               th:class="${activeLink == 'dashboard'} ? 'bg-[#fff5eb] text-[#b4572d] flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold shadow-sm' : 'flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-stone-400 hover:text-white hover:bg-white/5 transition-all'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+                Dashboard
+            </a>
+            <a th:href="@{/admin/products}" 
+               th:class="${activeLink == 'catalogue'} ? 'bg-[#fff5eb] text-[#b4572d] flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold shadow-sm' : 'flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-stone-400 hover:text-white hover:bg-white/5 transition-all'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                Catalogue
+            </a>
+            <a th:href="@{/admin/orders}" 
+               th:class="${activeLink == 'orders'} ? 'bg-[#fff5eb] text-[#b4572d] flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold shadow-sm' : 'flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-stone-400 hover:text-white hover:bg-white/5 transition-all'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5h6.75" />
+                </svg>
+                Orders
+            </a>
+            <a th:href="@{/admin/promotions}" 
+               th:class="${activeLink == 'promotions'} ? 'bg-[#fff5eb] text-[#b4572d] flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold shadow-sm' : 'flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-stone-400 hover:text-white hover:bg-white/5 transition-all'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581a1.125 1.125 0 001.591 0l4.318-4.318a1.125 1.125 0 000-1.591l-9.581-9.581A2.25 2.25 0 009.568 3zM6 6h.008v.008H6V6z" />
+                </svg>
+                Promotions
+            </a>
+        </nav>
+    </div>
+
+    <!-- Logout link -->
+    <div class="p-8">
+        <a th:href="@{/admin/logout}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-stone-400 hover:text-red-400 hover:bg-red-500/5 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+            </svg>
+            Sign Out
+        </a>
+    </div>
+</aside>

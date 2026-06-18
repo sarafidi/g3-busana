@@ -7,6 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, String> {
-   // Returns orders of a customer
     List <Order> findByCustomer_CustomerID(String customerID);
 }

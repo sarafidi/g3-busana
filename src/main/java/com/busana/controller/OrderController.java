@@ -2,6 +2,7 @@ package com.busana.controller;
 
 import org.springframework.stereotype.Controller;
 
+import java.math.BigDecimal;
 import org.springframework.ui.Model;
 
 import com.busana.model.Order;
@@ -21,7 +22,6 @@ public class OrderController {
             public OrderController(OrderService orderService) {
                 this.orderService = orderService;
             }
-    // Admin View All Orders
     @GetMapping("/admin/orders")
     public String viewAllOrders(Model model) {
         model.addAttribute("pageTitle", "Orders");
@@ -29,7 +29,6 @@ public class OrderController {
         return "admin/order-list";
     }
 
-    // Admin Views Order Details
     @GetMapping("/admin/orders/{orderId}")
     public String viewOrderDetails(
         @PathVariable String orderId,
@@ -47,7 +46,6 @@ public class OrderController {
         }
     }
 
-    //Customer Views Order Confirmation Page
     @GetMapping("/customer/order-confirmation/{orderId}")
     public String viewOrderConfirmationDetails(
         @PathVariable String orderId,
@@ -56,8 +54,23 @@ public class OrderController {
     ) {
         try {
             Order order = orderService.getOrderByOrderID(orderId);
-            model.addAttribute("pageTitle", "Order Confirmation for ORder: " + order.getOrderID());
+            model.addAttribute("pageTitle", "Order Confirmation for Order: " + order.getOrderID());
             model.addAttribute("order", order);
+            
+            model.addAttribute("deliveryAddress", order.getDeliveryAddress());
+            model.addAttribute("shippingFee", order.getShippingFee());
+            model.addAttribute("totalAmount", order.getTotalAmount());
+            model.addAttribute("subtotal", order.getTotalAmount().subtract(order.getShippingFee()));
+            
+            // Deduce shipping method from shipping fee
+            String method = "Standard";
+            if (order.getShippingFee().compareTo(BigDecimal.valueOf(15.00)) == 0) {
+                method = "Express";
+            } else if (order.getShippingFee().compareTo(BigDecimal.valueOf(30.00)) == 0) {
+                method = "Same-day Courier";
+            }
+            model.addAttribute("shippingMethod", method);
+            
             return "customer/order-confirmation";
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
@@ -84,4 +97,3 @@ public class OrderController {
     }
 
 }
-

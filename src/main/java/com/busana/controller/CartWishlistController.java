@@ -3,6 +3,8 @@ package com.busana.controller;
 import com.busana.model.*;
 import com.busana.service.CartWishlistService;
 import com.busana.service.CartWishlistService.CheckoutResult;
+import com.busana.service.OrderService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +21,9 @@ import java.util.List;
 public class CartWishlistController {
     @Autowired
     private CartWishlistService cartWishlistService;
+    
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping({"/cart", "/customer/cart"})
     public String viewCart(HttpSession session, Model model) {
@@ -103,6 +108,7 @@ public class CartWishlistController {
     public String addToWishlist(
             HttpSession session,
             @RequestParam String variantID,
+            HttpServletRequest request,
             RedirectAttributes redirectAttributes
     ) {
         String customerID = getCustomerID(session);
@@ -110,11 +116,38 @@ public class CartWishlistController {
 
         try {
             cartWishlistService.addToWishlist(customerID, variantID);
-            return "redirect:/wishlist";
+            redirectAttributes.addFlashAttribute("successMessage", "Item added to wishlist successfully!");
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/wishlist";
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
+
+        String referer = request.getHeader("Referer");
+        return referer != null ? "redirect:" + referer : "redirect:/customer/products";
+    }
+
+    @PostMapping("/wishlist/toggle")
+    public String toggleWishlist(
+            HttpSession session,
+            @RequestParam String variantID,
+            HttpServletRequest request,
+            RedirectAttributes redirectAttributes
+    ) {
+        String customerID = getCustomerID(session);
+        if (customerID == null) return "redirect:/customer/login";
+
+        try {
+            boolean removed = cartWishlistService.toggleWishlist(customerID, variantID);
+            if (removed) {
+                redirectAttributes.addFlashAttribute("successMessage", "Item removed from wishlist successfully!");
+            } else {
+                redirectAttributes.addFlashAttribute("successMessage", "Item added to wishlist successfully!");
+            }
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        String referer = request.getHeader("Referer");
+        return referer != null ? "redirect:" + referer : "redirect:/customer/products";
     }
 
     @PostMapping("/wishlist/remove")
@@ -147,7 +180,6 @@ public class CartWishlistController {
         List<CartItem> cartItems = cartWishlistService.viewCart(customerID);
         if (cartItems.isEmpty()) return "redirect:/cart";
 
-        // Delegate Strategy selection and calculation to Service
         CheckoutResult checkoutResult = cartWishlistService.calculateCheckout(cartItems, shippingMethod);
 
         model.addAttribute("cartItems", cartItems);
@@ -176,20 +208,13 @@ public class CartWishlistController {
             List<CartItem> cartItems = cartWishlistService.viewCart(customerID);
             if (cartItems.isEmpty()) return "redirect:/cart";
 
-            // Delegate Strategy selection and calculation to Service
             CheckoutResult checkoutResult = cartWishlistService.calculateCheckout(cartItems, shippingMethod);
 
-            // Clear Cart items
+            Order order = orderService.placeOrder(customerID, cartItems, checkoutResult.shippingFee(), checkoutResult.totalAmount(), deliveryAddress);
+
             cartWishlistService.clearCart(customerID);
 
-            // Pass variables via Flash Attributes
-            redirectAttributes.addFlashAttribute("deliveryAddress", deliveryAddress);
-            redirectAttributes.addFlashAttribute("shippingMethod", shippingMethod);
-            redirectAttributes.addFlashAttribute("shippingFee", checkoutResult.shippingFee());
-            redirectAttributes.addFlashAttribute("subtotal", checkoutResult.subtotal());
-            redirectAttributes.addFlashAttribute("totalAmount", checkoutResult.totalAmount());
-
-            return "redirect:/order/confirm";
+            return "redirect:/customer/order-confirmation/" + order.getOrderID();
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/checkout";

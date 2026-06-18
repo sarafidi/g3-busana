@@ -16,8 +16,8 @@
       <nav class="topbar-links">
         <a th:href="@{/customer/home}">Home</a>
         <a class="is-active" th:href="@{/customer/products}">Catalogue</a>
+        <a th:href="@{/wishlist}">Wishlist</a>
         <a th:href="@{/customer/cart}">My Shopping Cart</a>
-        <a th:href="@{/admin/products}">Admin View</a>
       </nav>
       <div class="profile-dropdown" th:if="${session.customerID != null}">
           <button class="profile-btn">
@@ -36,6 +36,15 @@
     </header>
 
     <main class="detail-main" th:if="${product != null}">
+        <!-- Feedback notifications -->
+        <section class="surface-panel" th:if="${successMessage}" style="margin-bottom: 1.25rem;">
+            <p class="feedback success" th:text="${successMessage}"></p>
+        </section>
+
+        <section class="surface-panel" th:if="${errorMessage}" style="margin-bottom: 1.25rem;">
+            <p class="feedback error" th:text="${errorMessage}"></p>
+        </section>
+
         <section class="detail-layout">
             <div class="surface-panel detail-gallery">
                 <div class="detail-hero-media">
@@ -47,26 +56,22 @@
                         <span th:text="${product.categoryName}">Category</span>
                     </div>
                 </div>
-
-                <div class="thumbnail-strip" th:if="${!product.imageList.isEmpty()}">
-                    <img
-                        th:each="image : ${product.imageList}"
-                        th:src="${image}"
-                        th:alt="${product.name}">
-                </div>
             </div>
 
             <div class="surface-panel detail-summary">
-                <div class="card-badges">
-                    <span class="badge badge-soft" th:text="${product.categoryName}">Tops</span>
-                    <span class="badge" th:classappend="${product.inStock} ? ' badge-success' : ' badge-muted'"
-                        th:text="${product.inStock} ? 'Ready to shop' : 'Currently unavailable'">
-                        Ready to shop
-                    </span>
+                <div class="detail-header-group">
+                    <div class="card-badges">
+                        <span class="badge badge-soft" th:text="${product.categoryName}">Tops</span>
+                        <span class="badge" th:classappend="${product.inStock} ? ' badge-success' : ' badge-muted'"
+                            th:text="${product.inStock} ? 'Ready to shop' : 'Currently unavailable'">
+                            Ready to shop
+                        </span>
+                    </div>
+
+                    <h1 th:text="${product.name}">Product Name</h1>
+                    <p class="detail-price" th:text="|RM ${#numbers.formatDecimal(product.basePrice, 1, 'COMMA', 2, 'POINT')}|">RM 0.00</p>
                 </div>
 
-                <h1 th:text="${product.name}">Product Name</h1>
-                <p class="detail-price" th:text="|RM ${#numbers.formatDecimal(product.basePrice, 1, 'COMMA', 2, 'POINT')}|">RM 0.00</p>
                 <p class="detail-copy" th:text="${product.description}">Product description</p>
 
                 <dl class="detail-specs">
@@ -94,7 +99,7 @@
                         <h2>Pick a size and colour combination</h2>
                     </div>
 
-                    <div class="variant-grid" data-variant-picker>
+                    <div class="variant-grid" data-variant-picker th:attr="data-wishlisted-ids=${wishlistedVariantIds != null ? #strings.listJoin(wishlistedVariantIds, ',') : ''}">
                         <label
                             class="variant-tile"
                             th:each="variant, variantStat : ${product.variants}"
@@ -119,18 +124,17 @@
                 </section>
 
                 <!-- Functional Add to Cart & Wishlist Forms -->
-                <div class="surface-inset callout-panel" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
-                    <h3 style="margin-top: 0;">Purchase Options</h3>
+                <div class="purchase-panel">
+                    <h3>Purchase Options</h3>
                     
                     <form th:action="@{/cart/add}" method="post" style="display: flex; flex-direction: column; gap: 0.75rem;">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" id="cartVariantID" name="variantID" th:value="${product.variants != null and !product.variants.isEmpty() ? product.variants[0].variantID : ''}" />
                         
                         <div style="display: flex; align-items: flex-end; gap: 1rem;">
-                            <div style="flex: 1;">
-                                <label for="quantity" style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--customer-muted); text-transform: uppercase; margin-bottom: 0.25rem;">Qty</label>
-                                <input type="number" id="quantity" name="quantity" value="1" min="1" max="10"
-                                       style="width: 100%; border: 1px solid var(--customer-border); border-radius: 8px; padding: 0.5rem; text-align: center; background-color: var(--customer-surface);" />
+                            <div class="qty-wrapper">
+                                <label for="quantity" class="qty-label">Qty</label>
+                                <input type="number" id="quantity" name="quantity" value="1" min="1" max="10" class="qty-input" />
                             </div>
                             <div style="flex: 2;">
                                 <button type="submit" id="addToCartBtn" class="button-primary" style="width: 100%; font-weight: 600;">
@@ -140,10 +144,12 @@
                         </div>
                     </form>
 
-                    <form th:action="@{/wishlist/add}" method="post" style="width: 100%;">
+                    <form th:action="@{/wishlist/toggle}" method="post" style="width: 100%;">
                         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <input type="hidden" id="wishlistVariantID" name="variantID" th:value="${product.variants != null and !product.variants.isEmpty() ? product.variants[0].variantID : ''}" />
-                        <button type="submit" id="addToWishlistBtn" class="button-secondary" style="width: 100%; font-weight: 600;">
+                        <button type="submit" id="addToWishlistBtn" class="button-secondary" style="width: 100%; font-weight: 600;"
+                                th:classappend="${wishlistedVariantIds != null and product.variants != null and !product.variants.isEmpty() and #lists.contains(wishlistedVariantIds, product.variants[0].variantID)} ? 'is-wishlisted' : ''"
+                                th:text="${wishlistedVariantIds != null and product.variants != null and !product.variants.isEmpty() and #lists.contains(wishlistedVariantIds, product.variants[0].variantID)} ? 'Wishlisted' : 'Add to Wishlist'">
                             Add to Wishlist
                         </button>
                     </form>

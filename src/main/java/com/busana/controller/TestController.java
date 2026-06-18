@@ -30,20 +30,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class TestController {
     
-    // visit http://localhost:8080/ to test this
     @GetMapping("/")
     public String home(Model model) {
-        // pass data to HTML template
-        model.addAttribute("pageTitle", "Welcome to BUSANA.my");
-        model.addAttribute("successMessage", "SpringBoot + Thymeleaf + MySQL is working correctly!");
-
-        // returns templates/customer/home.html
+        model.addAttribute("pageTitle", "Sign In | BUSANA.my");
         return "index";
     }
     
     @GetMapping("/test")
     public String test(@RequestParam Model model) {
-        // visit http://localhost:8080/test to see a plain confirmation
         model.addAttribute("pageTitle", "Stack Test");
         model.addAttribute("successMessage", "Controller -> Service -> Repository chain is ready");
         return "index";
