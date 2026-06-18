@@ -100,11 +100,6 @@ public class AuthController {
         return "admin/login";
     }
 
-    @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
-        return "admin/dashboard";
-    }
-
     //admin logout
     @GetMapping("/admin/logout")    
     public String logoutAdmin(HttpSession session) {
