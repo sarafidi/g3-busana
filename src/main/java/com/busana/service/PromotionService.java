@@ -2,6 +2,7 @@ package com.busana.service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,19 +21,37 @@ public class PromotionService {
 
     public Promotion createPromotion(Promotion promotion){
 
-                if (promotion.getStartDate() != null && promotion.getEndDate() != null) {
-    if (promotion.getEndDate().isBefore(promotion.getStartDate())) {
-        throw new IllegalArgumentException("The End Date cannot be before the Start Date.");
-    }
-}
-        List<String> existingIds = promotionRepository.findAll().stream()
-                .map(Promotion::getPromotionID)
-                .toList();
-                int nextNum = nextSequence(existingIds, "PROM");
-        String generatedId = formatId("PROM", nextNum);
+        if (promotion.getStartDate() != null && promotion.getEndDate() != null) {
+            if (promotion.getEndDate().isBefore(promotion.getStartDate())) {
+                throw new IllegalArgumentException("The End Date cannot be before the Start Date.");
+            }
+        }
 
-        promotion.setPromotionID(generatedId);
-    return promotionRepository.save(promotion);
+        // Check promotion name uniqueness
+        if (promotion.getPromotionName() != null && !promotion.getPromotionName().trim().isEmpty()) {
+            String cleanName = promotion.getPromotionName().trim();
+            Optional<Promotion> existingByName = promotionRepository.findByPromotionNameIgnoreCase(cleanName);
+            if (existingByName.isPresent()) {
+                throw new IllegalArgumentException("Promotion Name / Code '" + cleanName + "' already exists.");
+            }
+        }
+
+        if (promotion.getPromotionID() != null && !promotion.getPromotionID().trim().isEmpty()) {
+            String cleanId = promotion.getPromotionID().trim();
+            if (promotionRepository.existsById(cleanId)) {
+                throw new IllegalArgumentException("Promotion Code / ID '" + cleanId + "' already exists.");
+            }
+            promotion.setPromotionID(cleanId);
+        } else {
+            List<String> existingIds = promotionRepository.findAll().stream()
+                    .map(Promotion::getPromotionID)
+                    .toList();
+            int nextNum = nextSequence(existingIds, "PROM");
+            String generatedId = formatId("PROM", nextNum);
+            promotion.setPromotionID(generatedId);
+        }
+
+        return promotionRepository.save(promotion);
     };
     
     //Admin Views Promotions
@@ -58,12 +77,22 @@ public class PromotionService {
     @Transactional
     public Promotion updatePromotion(String promotionID, Promotion updatedPromo){
 
-                        if (updatedPromo.getStartDate() != null && updatedPromo.getEndDate() != null) {
-    if (updatedPromo.getEndDate().isBefore(updatedPromo.getStartDate())) {
-        throw new IllegalArgumentException("The End Date cannot be before the Start Date.");
-    }
-}
+        if (updatedPromo.getStartDate() != null && updatedPromo.getEndDate() != null) {
+            if (updatedPromo.getEndDate().isBefore(updatedPromo.getStartDate())) {
+                throw new IllegalArgumentException("The End Date cannot be before the Start Date.");
+            }
+        }
         Promotion promotion = getPromotionByID(promotionID);
+
+        // Check promotion name uniqueness
+        if (updatedPromo.getPromotionName() != null && !updatedPromo.getPromotionName().trim().isEmpty()) {
+            String cleanName = updatedPromo.getPromotionName().trim();
+            Optional<Promotion> existingByName = promotionRepository.findByPromotionNameIgnoreCase(cleanName);
+            if (existingByName.isPresent() && !existingByName.get().getPromotionID().equals(promotionID)) {
+                throw new IllegalArgumentException("Promotion Name / Code '" + cleanName + "' already exists.");
+            }
+        }
+
         promotion.setStatus(updatedPromo.getStatus());
         promotion.setStartDate(updatedPromo.getStartDate());
         promotion.setPromotionName(updatedPromo.getPromotionName());
@@ -72,8 +101,7 @@ public class PromotionService {
         promotion.setDiscountType(updatedPromo.getDiscountType());
         promotion.setApplicableCategory(updatedPromo.getApplicableCategory());
 
-            return promotionRepository.save(promotion); 
-
+        return promotionRepository.save(promotion); 
     };
     
     // Delete

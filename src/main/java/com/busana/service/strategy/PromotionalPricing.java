@@ -9,11 +9,11 @@ public class PromotionalPricing implements PricingStrategy {
         this.discountType = discountType;
     }
 
-    // "fixed"          -> subtract flat amount
-    // "percentage"     -> multiply by remaining percentage
+    // "fixed" / "flat"  -> subtract flat amount
+    // "percentage"      -> multiply by remaining percentage
     @Override
     public double calculatePrice(double basePrice) {
-        double finalPrice =  discountType.equals("fixed")
+        double finalPrice = (discountType.equalsIgnoreCase("fixed") || discountType.equalsIgnoreCase("flat"))
                 ? basePrice - discountValue
                 : (100 - discountValue)/100 * basePrice;
         return Math.max(finalPrice, 0);

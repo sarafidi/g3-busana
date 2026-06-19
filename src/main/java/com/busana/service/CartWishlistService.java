@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 @Service
 public class CartWishlistService {
@@ -272,27 +273,94 @@ public class CartWishlistService {
     }
 
     public CheckoutResult calculateCheckout(List<CartItem> cartItems, String shippingMethod) {
-        double subtotal = cartItems.stream().mapToDouble(CartItem::getSubtotal).sum();
-
-        // 1. Select the concrete Strategy based on the selection
-        ShippingStrategy strategy;
-        if ("express".equalsIgnoreCase(shippingMethod)) {
-            strategy = new ExpressShipping();
-        } else if ("sameday".equalsIgnoreCase(shippingMethod)) {
-            strategy = new SameDayShipping();
-        } else {
-            strategy = new StandardShipping();
-        }
-
-        // 2. Pass strategy to context
-        checkoutContext.setShippingStrategy(strategy);
-
-        // 3. Execute strategy calculation
-        double shippingFee = checkoutContext.executeShipping();
-        double totalAmount = subtotal + shippingFee;
-
-        return new CheckoutResult(subtotal, shippingFee, totalAmount);
+        return calculateCheckout(cartItems, shippingMethod, List.of());
     }
 
-    public record CheckoutResult(double subtotal, double shippingFee, double totalAmount) {}
+    public CheckoutResult calculateCheckout(List<CartItem> cartItems, String shippingMethod, Promotion promotion) {
+        return calculateCheckout(cartItems, shippingMethod, promotion != null ? List.of(promotion) : List.of());
+    }
+
+    public CheckoutResult calculateCheckout(List<CartItem> cartItems, String shippingMethod, List<Promotion> promotions) {
+        double subtotal = cartItems.stream().mapToDouble(CartItem::getSubtotal).sum();
+
+        // 1. Select concrete Shipping Strategy
+        ShippingStrategy shippingStrategy;
+        if ("express".equalsIgnoreCase(shippingMethod)) {
+            shippingStrategy = new ExpressShipping();
+        } else if ("sameday".equalsIgnoreCase(shippingMethod)) {
+            shippingStrategy = new SameDayShipping();
+        } else {
+            shippingStrategy = new StandardShipping();
+        }
+        checkoutContext.setShippingStrategy(shippingStrategy);
+        double shippingFee = checkoutContext.executeShipping();
+
+        // 2. Select concrete Pricing Strategy and apply sequentially
+        double discountedSubtotal = subtotal;
+        double discountAmount = 0.0;
+
+        if (promotions != null && !promotions.isEmpty()) {
+            double[] itemPrices = new double[cartItems.size()];
+            for (int i = 0; i < cartItems.size(); i++) {
+                itemPrices[i] = cartItems.get(i).getSubtotal();
+            }
+
+            for (Promotion promo : promotions) {
+                PricingStrategy pricingStrategy = new PromotionalPricing(promo.getDiscountValue().doubleValue(), promo.getDiscountType());
+                checkoutContext.setPricingStrategy(pricingStrategy);
+
+                String applicableCategory = promo.getApplicableCategory();
+                if (applicableCategory != null && !applicableCategory.trim().isEmpty()) {
+                    double eligibleSubtotal = 0.0;
+                    for (int i = 0; i < cartItems.size(); i++) {
+                        Product product = cartItems.get(i).getVariant().getProduct();
+                        String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : "";
+                        if (categoryName.equalsIgnoreCase(applicableCategory.trim())) {
+                            eligibleSubtotal += itemPrices[i];
+                        }
+                    }
+
+                    if (eligibleSubtotal > 0) {
+                        double finalEligibleSubtotal = checkoutContext.executePrice(eligibleSubtotal);
+                        double factor = finalEligibleSubtotal / eligibleSubtotal;
+                        for (int i = 0; i < cartItems.size(); i++) {
+                            Product product = cartItems.get(i).getVariant().getProduct();
+                            String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : "";
+                            if (categoryName.equalsIgnoreCase(applicableCategory.trim())) {
+                                itemPrices[i] *= factor;
+                            }
+                        }
+                    }
+                } else {
+                    double currentTotal = 0.0;
+                    for (double price : itemPrices) {
+                        currentTotal += price;
+                    }
+                    if (currentTotal > 0) {
+                        double finalTotal = checkoutContext.executePrice(currentTotal);
+                        double factor = finalTotal / currentTotal;
+                        for (int i = 0; i < itemPrices.length; i++) {
+                            itemPrices[i] *= factor;
+                        }
+                    }
+                }
+            }
+
+            double finalSum = 0.0;
+            for (double price : itemPrices) {
+                finalSum += price;
+            }
+            discountedSubtotal = finalSum;
+            discountAmount = subtotal - discountedSubtotal;
+        } else {
+            PricingStrategy pricingStrategy = new RegularPricing();
+            checkoutContext.setPricingStrategy(pricingStrategy);
+            discountedSubtotal = checkoutContext.executePrice(subtotal);
+        }
+
+        double totalAmount = discountedSubtotal + shippingFee;
+        return new CheckoutResult(subtotal, discountAmount, shippingFee, totalAmount);
+    }
+
+    public record CheckoutResult(double subtotal, double discountAmount, double shippingFee, double totalAmount) {}
 }

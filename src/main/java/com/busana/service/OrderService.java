@@ -16,6 +16,7 @@ import com.busana.model.OrderItem;
 import com.busana.model.Customer;
 import com.busana.model.ProductVariant;
 import com.busana.model.CartItem;
+import com.busana.model.Promotion;
 import com.busana.repository.OrderRepository;
 import com.busana.repository.CustomerRepository;
 import com.busana.repository.OrderItemRepository;
@@ -46,6 +47,11 @@ public class OrderService {
 
     @Transactional
     public Order placeOrder(String customerID, List<CartItem> cartItems, double shippingFee, double totalAmount, String deliveryAddress) {
+        return placeOrder(customerID, cartItems, shippingFee, totalAmount, deliveryAddress, null);
+    }
+
+    @Transactional
+    public Order placeOrder(String customerID, List<CartItem> cartItems, double shippingFee, double totalAmount, String deliveryAddress, Promotion promotion) {
         Customer customer = customerRepository.findById(customerID.trim())
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + customerID));
 
@@ -54,6 +60,7 @@ public class OrderService {
         Order order = new Order();
         order.setOrderID(orderId);
         order.setCustomer(customer);
+        order.setPromotion(promotion);
         order.setOrderDate(LocalDate.now());
         order.setOrderStatus("Pending");
         order.setShippingFee(BigDecimal.valueOf(shippingFee));

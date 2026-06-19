@@ -42,6 +42,24 @@
             <p class="mt-2 text-sm text-[#6e5a4e]">Review your order and select your shipping method</p>
         </div>
 
+        <!-- Promotion Announcement Bar -->
+        <div th:if="${activePromotions != null and !activePromotions.isEmpty()}" class="mb-6 p-4 rounded-2xl bg-amber-50/50 border border-amber-200 text-amber-900 text-sm flex flex-col gap-1.5 shadow-sm">
+            <div class="flex items-center gap-2 font-semibold font-['Prata'] text-[#2d201a]">
+                <svg class="w-4 h-4 text-[#b4572d] animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                </svg>
+                Active Campaigns &amp; Offers
+            </div>
+            <ul class="list-disc pl-5 space-y-1 mt-1 text-[#6e5a4e]">
+                <li th:each="promo : ${activePromotions}">
+                    Apply code <strong class="text-amber-800 uppercase font-mono px-1.5 py-0.5 rounded bg-amber-100/50" th:text="${promo.promotionID}">WELCOME10</strong>
+                    to get <span th:text="${promo.discountType == 'percentage' ? #numbers.formatDecimal(promo.discountValue, 1, 0) + '%' : 'RM ' + promo.discountValue}">10%</span> off 
+                    <span th:text="${promo.applicableCategory != null and promo.applicableCategory != '' ? 'on ' + promo.applicableCategory : 'storewide'}">storewide</span>!
+                    (Ends <span th:text="${promo.endDate}">2026-06-25</span>)
+                </li>
+            </ul>
+        </div>
+
         <!-- Error message -->
         <div th:if="${error}" class="mb-6 p-4 rounded-xl bg-red-50 text-red-700 text-sm border border-red-200" th:text="${error}"></div>
 
@@ -127,6 +145,43 @@
                             </label>
                         </div>
                     </div>
+
+                    <!-- Promotion Code -->
+                    <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
+                        <h2 class="text-sm font-semibold tracking-wider text-[#2d201a] uppercase mb-4 font-['Prata']">3. Promotion Code</h2>
+                        <div class="flex gap-2">
+                            <input type="text" id="promoCodeInput" placeholder="Enter promo code (e.g. SALE10)"
+                                   class="flex-1 rounded-xl border border-stone-300 px-4 py-3 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition-all uppercase" />
+                            <button type="button" onclick="applyPromoCode()"
+                                    class="rounded-xl bg-stone-900 hover:bg-stone-850 px-6 py-3 text-sm font-semibold text-white transition-colors duration-150">
+                                Apply
+                            </button>
+                        </div>
+                        
+                        <!-- Hidden input to submit all applied promo codes -->
+                        <input type="hidden" id="promoCodeHidden" name="promoCode" th:value="${promoCode}" />
+
+                        <!-- Applied Promotions list with remove buttons -->
+                        <div th:if="${promotions != null and !promotions.isEmpty()}" class="mt-3 space-y-2">
+                            <div class="text-xs font-semibold text-stone-600">Applied Promo Codes:</div>
+                            <div class="flex flex-wrap gap-2">
+                                <span th:each="promo : ${promotions}" 
+                                      class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                                    <span th:text="${promo.promotionID}">WELCOME10</span>
+                                    <button type="button" th:attr="onclick=|removePromoCode('${promo.promotionID}')|" class="hover:text-emerald-950 font-bold ml-1 text-emerald-400 focus:outline-none" style="font-size: 1.1rem; line-height: 1;">
+                                        &times;
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Success / Error messages -->
+                        <div th:if="${promoErrors != null and !promoErrors.isEmpty()}" class="mt-2 space-y-1">
+                            <div th:each="err : ${promoErrors}" class="text-xs text-red-600 font-medium" th:text="${err}">
+                                Promo code is invalid.
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
 
@@ -139,6 +194,10 @@
                         <div class="flex justify-between">
                             <span>Subtotal</span>
                             <span class="font-medium text-stone-900">RM <span th:text="${#numbers.formatDecimal(subtotal, 1, 'COMMA', 2, 'POINT')}">0.00</span></span>
+                        </div>
+                        <div th:if="${discountAmount != null and discountAmount > 0}" class="flex justify-between text-emerald-600 font-medium">
+                            <span>Discount <span th:text="${promotion != null ? '(' + promotion.promotionID + ')' : ''}"></span></span>
+                            <span>-RM <span th:text="${#numbers.formatDecimal(discountAmount, 1, 'COMMA', 2, 'POINT')}">0.00</span></span>
                         </div>
                         <div class="flex justify-between">
                             <span>Shipping Fee</span>
@@ -163,11 +222,55 @@
             </div>
         </div>
 
-        <script>
+        <script th:inline="javascript">
             function updateShippingMethod(method) {
                 const addressVal = document.getElementById('deliveryAddress').value;
+                const promoVal = document.getElementById('promoCodeHidden')?.value || '';
                 const encodedAddress = encodeURIComponent(addressVal);
-                window.location.href = '/checkout?shippingMethod=' + method + '&address=' + encodedAddress;
+                const encodedPromo = encodeURIComponent(promoVal);
+                window.location.href = '/checkout?shippingMethod=' + method + '&address=' + encodedAddress + '&promoCode=' + encodedPromo;
+            }
+
+            function applyPromoCode() {
+                const method = document.querySelector('input[name="shippingMethod"]:checked')?.value || 'standard';
+                const addressVal = document.getElementById('deliveryAddress').value;
+                const newPromo = document.getElementById('promoCodeInput').value.trim();
+                
+                if (newPromo === '') {
+                    return;
+                }
+
+                // Get currently applied promo codes from hidden field
+                const currentPromo = document.getElementById('promoCodeHidden')?.value || '';
+                let finalPromo = '';
+                if (currentPromo && currentPromo.trim() !== '') {
+                    const codesList = currentPromo.split(',').map(c => c.trim().toUpperCase());
+                    if (codesList.includes(newPromo.toUpperCase())) {
+                        alert('Promo code is already applied.');
+                        return;
+                    }
+                    finalPromo = currentPromo + ',' + newPromo;
+                } else {
+                    finalPromo = newPromo;
+                }
+
+                const encodedAddress = encodeURIComponent(addressVal);
+                const encodedPromo = encodeURIComponent(finalPromo);
+                window.location.href = '/checkout?shippingMethod=' + method + '&address=' + encodedAddress + '&promoCode=' + encodedPromo;
+            }
+
+            function removePromoCode(codeToRemove) {
+                const method = document.querySelector('input[name="shippingMethod"]:checked')?.value || 'standard';
+                const addressVal = document.getElementById('deliveryAddress').value;
+                const currentPromo = document.getElementById('promoCodeHidden')?.value || '';
+                
+                const codesList = currentPromo.split(',').map(c => c.trim());
+                const remainingCodes = codesList.filter(c => c.toLowerCase() !== codeToRemove.toLowerCase());
+                const finalPromo = remainingCodes.join(',');
+                
+                const encodedAddress = encodeURIComponent(addressVal);
+                const encodedPromo = encodeURIComponent(finalPromo);
+                window.location.href = '/checkout?shippingMethod=' + method + '&address=' + encodedAddress + '&promoCode=' + encodedPromo;
             }
         </script>
     </div>

@@ -4,6 +4,7 @@ import com.busana.model.*;
 import com.busana.service.CartWishlistService;
 import com.busana.service.CartWishlistService.CheckoutResult;
 import com.busana.service.OrderService;
+import com.busana.repository.PromotionRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.ArrayList;
 
 @Controller
 public class CartWishlistController {
@@ -24,6 +28,9 @@ public class CartWishlistController {
     
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private PromotionRepository promotionRepository;
 
     @GetMapping({"/cart", "/customer/cart"})
     public String viewCart(HttpSession session, Model model) {
@@ -172,6 +179,7 @@ public class CartWishlistController {
     public String viewCheckout(
             HttpSession session,
             @RequestParam(value = "shippingMethod", required = false, defaultValue = "standard") String shippingMethod,
+            @RequestParam(value = "promoCode", required = false) String promoCode,
             Model model
     ) {
         String customerID = getCustomerID(session);
@@ -180,16 +188,78 @@ public class CartWishlistController {
         List<CartItem> cartItems = cartWishlistService.viewCart(customerID);
         if (cartItems.isEmpty()) return "redirect:/cart";
 
-        CheckoutResult checkoutResult = cartWishlistService.calculateCheckout(cartItems, shippingMethod);
+        // Expose active promotions
+        List<Promotion> allPromotions = promotionRepository.findAll();
+        LocalDate now = LocalDate.now();
+        List<Promotion> activePromotions = allPromotions.stream()
+                .filter(p -> "active".equalsIgnoreCase(p.getStatus()))
+                .filter(p -> !now.isBefore(p.getStartDate()) && !now.isAfter(p.getEndDate()))
+                .toList();
+        model.addAttribute("activePromotions", activePromotions);
+
+        List<Promotion> promotions = new ArrayList<>();
+        List<String> promoErrors = new ArrayList<>();
+        List<String> appliedCodeStrings = new ArrayList<>();
+        
+        if (promoCode != null && !promoCode.trim().isEmpty()) {
+            String[] codes = promoCode.split(",");
+            for (String code : codes) {
+                String cleanCode = code.trim();
+                if (cleanCode.isEmpty()) continue;
+                
+                Optional<Promotion> promoOpt = promotionRepository.findById(cleanCode);
+                if (promoOpt.isPresent()) {
+                    Promotion p = promoOpt.get();
+                    if ("active".equalsIgnoreCase(p.getStatus())) {
+                        if (!now.isBefore(p.getStartDate()) && !now.isAfter(p.getEndDate())) {
+                            // Check if the cart has items in the applicable category
+                            String appCategory = p.getApplicableCategory();
+                            if (appCategory != null && !appCategory.trim().isEmpty()) {
+                                boolean hasEligibleItems = cartItems.stream().anyMatch(item -> {
+                                    Product product = item.getVariant().getProduct();
+                                    String catName = product.getCategory() != null ? product.getCategory().getCategoryName() : "";
+                                    return catName.equalsIgnoreCase(appCategory.trim());
+                                });
+                                if (hasEligibleItems) {
+                                    promotions.add(p);
+                                    appliedCodeStrings.add(cleanCode);
+                                } else {
+                                    promoErrors.add("Code '" + cleanCode + "' applies only to '" + appCategory + "' category, not in cart.");
+                                }
+                            } else {
+                                promotions.add(p);
+                                appliedCodeStrings.add(cleanCode);
+                            }
+                        } else {
+                            promoErrors.add("Code '" + cleanCode + "' is expired.");
+                        }
+                    } else {
+                        promoErrors.add("Code '" + cleanCode + "' is inactive.");
+                    }
+                } else {
+                    promoErrors.add("Code '" + cleanCode + "' not found.");
+                }
+            }
+        }
+
+        CheckoutResult checkoutResult = cartWishlistService.calculateCheckout(cartItems, shippingMethod, promotions);
 
         model.addAttribute("cartItems", cartItems);
         model.addAttribute("subtotal", checkoutResult.subtotal());
+        model.addAttribute("discountAmount", checkoutResult.discountAmount());
         model.addAttribute("shippingMethod", shippingMethod);
         model.addAttribute("shippingFee", checkoutResult.shippingFee());
         model.addAttribute("totalAmount", checkoutResult.totalAmount());
-        model.addAttribute("totalDisplay", "RM " + String.format("%.2f", checkoutResult.totalAmount()) + 
-                           " (Subtotal: RM " + String.format("%.2f", checkoutResult.subtotal()) + 
-                           " + Shipping: RM " + String.format("%.2f", checkoutResult.shippingFee()) + ")");
+        model.addAttribute("promoCode", String.join(",", appliedCodeStrings));
+        model.addAttribute("promotions", promotions);
+        model.addAttribute("promoErrors", promoErrors);
+
+        String displayDetails = "Subtotal: RM " + String.format("%.2f", checkoutResult.subtotal());
+        if (checkoutResult.discountAmount() > 0) {
+            displayDetails += " - Discount: RM " + String.format("%.2f", checkoutResult.discountAmount());
+        }
+        displayDetails += " + Shipping: RM " + String.format("%.2f", checkoutResult.shippingFee());
+        model.addAttribute("totalDisplay", "RM " + String.format("%.2f", checkoutResult.totalAmount()) + " (" + displayDetails + ")");
         
         return "customer/checkout";
     }
@@ -199,6 +269,7 @@ public class CartWishlistController {
             HttpSession session,
             @RequestParam String shippingMethod,
             @RequestParam String deliveryAddress,
+            @RequestParam(value = "promoCode", required = false) String promoCode,
             RedirectAttributes redirectAttributes
     ) {
         String customerID = getCustomerID(session);
@@ -208,9 +279,43 @@ public class CartWishlistController {
             List<CartItem> cartItems = cartWishlistService.viewCart(customerID);
             if (cartItems.isEmpty()) return "redirect:/cart";
 
-            CheckoutResult checkoutResult = cartWishlistService.calculateCheckout(cartItems, shippingMethod);
+            List<Promotion> promotions = new ArrayList<>();
+            if (promoCode != null && !promoCode.trim().isEmpty()) {
+                String[] codes = promoCode.split(",");
+                for (String code : codes) {
+                    String cleanCode = code.trim();
+                    if (cleanCode.isEmpty()) continue;
+                    
+                    Optional<Promotion> promoOpt = promotionRepository.findById(cleanCode);
+                    if (promoOpt.isPresent()) {
+                        Promotion p = promoOpt.get();
+                        if ("active".equalsIgnoreCase(p.getStatus())) {
+                            LocalDate now = LocalDate.now();
+                            if (!now.isBefore(p.getStartDate()) && !now.isAfter(p.getEndDate())) {
+                                String appCategory = p.getApplicableCategory();
+                                if (appCategory != null && !appCategory.trim().isEmpty()) {
+                                    boolean hasEligibleItems = cartItems.stream().anyMatch(item -> {
+                                        Product product = item.getVariant().getProduct();
+                                        String catName = product.getCategory() != null ? product.getCategory().getCategoryName() : "";
+                                        return catName.equalsIgnoreCase(appCategory.trim());
+                                    });
+                                    if (hasEligibleItems) {
+                                        promotions.add(p);
+                                    }
+                                } else {
+                                    promotions.add(p);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
-            Order order = orderService.placeOrder(customerID, cartItems, checkoutResult.shippingFee(), checkoutResult.totalAmount(), deliveryAddress);
+            CheckoutResult checkoutResult = cartWishlistService.calculateCheckout(cartItems, shippingMethod, promotions);
+
+            // Pass the first promotion as the primary FK reference in order table
+            Promotion primaryPromo = promotions.isEmpty() ? null : promotions.get(0);
+            Order order = orderService.placeOrder(customerID, cartItems, checkoutResult.shippingFee(), checkoutResult.totalAmount(), deliveryAddress, primaryPromo);
 
             cartWishlistService.clearCart(customerID);
 
