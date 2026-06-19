@@ -1,4 +1,4 @@
-package com.busana.service;
+package com.busana.service.observer;
 
 import com.busana.model.Order;
 

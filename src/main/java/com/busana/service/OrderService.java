@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.busana.service.observer.EmailNotificationObserver;
+import com.busana.service.observer.OrderManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

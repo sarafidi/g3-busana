@@ -2,6 +2,7 @@ package com.busana.service;
 
 import com.busana.model.Admin;
 import com.busana.model.Customer;
+import com.busana.service.singleton.DBConnection;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

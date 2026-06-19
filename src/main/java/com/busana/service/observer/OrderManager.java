@@ -1,8 +1,7 @@
-package com.busana.service;
+package com.busana.service.observer;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.busana.model.Order;

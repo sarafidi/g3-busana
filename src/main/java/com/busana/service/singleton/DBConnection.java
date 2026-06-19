@@ -1,6 +1,6 @@
 //Singleton pattern implementation for DBConnection class
 
-package com.busana.service;
+package com.busana.service.singleton;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -2,7 +2,7 @@ package com.busana.service;
 
 import com.busana.model.*;
 import com.busana.repository.*;
-import com.busana.service.pattern.*;
+import com.busana.service.strategy.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

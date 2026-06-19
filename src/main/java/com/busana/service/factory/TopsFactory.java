@@ -1,5 +1,6 @@
-package com.busana.service;
+package com.busana.service.factory;
 
+import com.busana.service.ProductService;
 import org.springframework.stereotype.Component;
 
 import com.busana.model.Category;
@@ -7,11 +8,11 @@ import com.busana.model.Product;
 import com.busana.model.ProductVariant;
 
 @Component
-public class AccessoriesFactory implements ProductFactory {
+public class TopsFactory implements ProductFactory {
 
     @Override
     public String getSupportedCategory() {
-        return "accessories";
+        return "tops";
     }
 
     @Override
@@ -51,7 +52,7 @@ public class AccessoriesFactory implements ProductFactory {
 
     private void ensureCategory(Category category) {
         if (category == null || !getSupportedCategory().equalsIgnoreCase(category.getCategoryName())) {
-            throw new IllegalArgumentException("AccessoriesFactory can only create products for the Accessories category.");
+            throw new IllegalArgumentException("TopsFactory can only create products for the Tops category.");
         }
     }
 }

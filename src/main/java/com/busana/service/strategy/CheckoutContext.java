@@ -1,4 +1,4 @@
-package com.busana.service.pattern;
+package com.busana.service.strategy;
 
 import org.springframework.stereotype.Service;
 
