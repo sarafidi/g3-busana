@@ -3,7 +3,7 @@ package com.busana.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "customer")
+@Table(name = "Customer")
 public class Customer {
     @Id
     @Column(name = "customerID", length = 20, nullable = false)

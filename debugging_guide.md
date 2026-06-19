@@ -1,101 +1,131 @@
-# Strategy Pattern Debugging & Breakpoint Guide (Service-Delegated)
+# Debugging Guide: Strategy Pattern in Checkout Flow
 
-This guide explains how the **Strategy Pattern** is applied to your shipping options (`ShippingStrategy`) and teaches you exactly how to demonstrate it to your lecturer step-by-step using debugger breakpoints in IntelliJ IDEA (or VS Code).
+This guide describes where to place breakpoints and what to inspect to verify the correct behavior and design of the **Strategy Pattern** implemented in the checkout flow of the Busana application.
 
-In this implementation, the project follows clean architecture principles (Thin Controller / Fat Service): the strategy logic has been delegated from the controller to the service layer.
-
----
-
-## 1. Strategy Pattern Architecture in Your Code
-
-To explain the pattern to your lecturer, you should identify these key components:
-
-1. **The Client**: [CartWishlistService.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/CartWishlistService.java) (specifically the `calculateCheckout()` method)
-   - Instantiates a concrete strategy based on the customer's selection and passes it to the `CheckoutContext`.
-2. **The Context**: [CheckoutContext.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/pattern/CheckoutContext.java)
-   - Maintains a reference to a `ShippingStrategy` object and delegates the execution to it at runtime.
-3. **The Strategy Interface**: [ShippingStrategy.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/pattern/ShippingStrategy.java)
-   - Declares the common method `calculateShippingFee()` that all concrete strategies must implement.
-4. **Concrete Strategies**:
-   - [StandardShipping.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/pattern/StandardShipping.java) (returns RM 5.00)
-   - [ExpressShipping.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/pattern/ExpressShipping.java) (returns RM 15.00)
-   - [SameDayShipping.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/pattern/SameDayShipping.java) (returns RM 30.00)
+The Strategy Pattern is used in `CartWishlistService.java` to dynamically calculate **Shipping Fees** (`ShippingStrategy`) and **Discounts/Pricing** (`PricingStrategy`).
 
 ---
 
-## 2. Where to Set Your Breakpoints
-
-Open your IDE (IntelliJ IDEA is recommended) and click on the gutter (left-hand margin next to the line numbers) to set red breakpoint circles at these exact locations:
-
-### Breakpoint 1: The Starting Point (The Client)
-* **File**: [CartWishlistService.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/CartWishlistService.java)
-* **Line**: `240` (inside the `calculateCheckout` method)
-* **Code line**: `if ("express".equalsIgnoreCase(shippingMethod)) {`
-* **Purpose**: Capture the process immediately when the service starts processing the checkout.
-
-### Breakpoint 2: The Context Delegation
-* **File**: [CheckoutContext.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/pattern/CheckoutContext.java)
-* **Line**: `15` (inside the `executeShipping` method)
-* **Code line**: `return shippingStrategy.calculateShippingFee();`
-* **Purpose**: Show that the context does not know which shipping calculation it runs—it delegates to the polymorphic interface.
-
-### Breakpoint 3: Concrete Strategy calculation
-* **File**: [ExpressShipping.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/pattern/ExpressShipping.java)
-* **Line**: `9`
-* **Code line**: `return 15.00;`
-* **Purpose**: Show that the debugger steps exactly into the selected concrete implementation.
+## Class Structure Overview
+- **Context**: `CheckoutContext.java`
+- **Shipping Strategy Interface**: `ShippingStrategy.java`
+  - *Concrete Strategies*: `StandardShipping.java`, `ExpressShipping.java`, `SameDayShipping.java`
+- **Pricing Strategy Interface**: `PricingStrategy.java`
+  - *Concrete Strategies*: `RegularPricing.java`, `PromotionalPricing.java`
+- **Client**: `CartWishlistService.java` (specifically the `calculateCheckout` method)
 
 ---
 
-## 3. Step-by-Step Demonstration Flow
+## Breakpoints to Set
 
-Follow these steps to run the demo:
+### 📌 Breakpoint 1: Shipping Strategy Selection
+* **File**: [CartWishlistService.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/CartWishlistService.java#L286-L294)
+* **Location**: Lines 286–294 (inside `calculateCheckout` method)
+* **Code Segment**:
+  ```java
+  ShippingStrategy shippingStrategy;
+  if ("express".equalsIgnoreCase(shippingMethod)) {
+      shippingStrategy = new ExpressShipping();
+  } else if ("sameday".equalsIgnoreCase(shippingMethod)) {
+      shippingStrategy = new SameDayShipping();
+  } else {
+      shippingStrategy = new StandardShipping();
+  }
+  ```
 
-### Step 1: Run the Server in Debug Mode
-1. In IntelliJ, click the **bug icon** (Debug 'BusanaApplication') to run the Spring Boot app.
-2. Ensure your local MySQL DB is running.
+#### What to inspect and say:
+> **Explanation**: "This breakpoint verifies the dynamic selection of the concrete shipping strategy. Here, the system intercepts the client's choice of `shippingMethod` and instantiates the correct subclass (`StandardShipping`, `ExpressShipping`, or `SameDayShipping`)."
+> * **Variables to watch**:
+>   * `shippingMethod` (String): Verify it matches the user selection (e.g., `"standard"`, `"express"`, or `"sameday"`).
+>   * `shippingStrategy` (ShippingStrategy): Confirm the correct concrete instance has been created (e.g., `ExpressShipping`).
 
-### Step 2: Trigger the Flow in Your Browser
-1. Open your browser and go to: `http://localhost:8080/`
-2. Log in as a customer, add some items to your cart, and go to the **Cart** page.
-3. Click the **Proceed to Checkout** button.
-4. On the checkout screen, enter a delivery address.
-5. Select **Express Shipping** as the method.
-6. Click the **Place Order & Pay** button.
+---
 
-### Step 3: Debugging Walkthrough (Show your Lecturer)
+### 📌 Breakpoint 2: Injecting Strategy into Context
+* **File**: [CartWishlistService.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/CartWishlistService.java#L295)
+* **Location**: Line 295
+* **Code Segment**:
+  ```java
+  checkoutContext.setShippingStrategy(shippingStrategy);
+  ```
 
-As soon as you click the button, your IDE will pop up and suspend execution at **Breakpoint 1** in `CartWishlistService.java`. Explain the following steps to your lecturer:
+#### What to inspect and say:
+> **Explanation**: "This breakpoint shows strategy injection. The client sets the concrete strategy object inside `CheckoutContext`, delegating subsequent math operations to this strategy without letting the context know about the concrete class's details."
+> * **Variables to watch**:
+>   * `checkoutContext` (CheckoutContext): Inspect that the context object is instantiated and not null.
+>   * `shippingStrategy` (ShippingStrategy): Observe that this is the instance about to be bound to the context.
 
-1. **Inspect the Selected Method**:
-   - Point to the **Variables** panel at the bottom of the IDE.
-   - Show that `shippingMethod` has the value `"express"`.
+---
 
-2. **Step Over to See Instantiation**:
-   - Click **Step Over** (Shortcut: **F8** in IntelliJ).
-   - The execution line jumps inside the `"express"` conditional block and instantiates `strategy = new ExpressShipping()`.
-   - Point to the `strategy` variable in the IDE to show its dynamic type is `ExpressShipping`.
+### 📌 Breakpoint 3: Delegating Shipping Fee Execution
+* **File**: [CheckoutContext.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/strategy/CheckoutContext.java#L14-L16)
+* **Location**: Line 15 (inside `executeShipping()`)
+* **Code Segment**:
+  ```java
+  return shippingStrategy.calculateShippingFee();
+  ```
 
-3. **Step Into setting the Strategy**:
-   - Keep stepping over until you reach the line:
-     `checkoutContext.setShippingStrategy(strategy);`
-   - Click **Step Into** (Shortcut: **F7** in IntelliJ).
-   - This takes you into `CheckoutContext.java` at line 10, setting the `shippingStrategy` field to the `ExpressShipping` instance. 
-   - Click **Step Out** (Shortcut: **Shift + F8**) to return to the service.
+#### What to inspect and say:
+> **Explanation**: "This breakpoint demonstrates polymorphism. By stepping into `checkoutContext.executeShipping()`, we verify that control is forwarded directly to `shippingStrategy.calculateShippingFee()`. Even though the context only knows about the `ShippingStrategy` interface, the JVM calls the correct subclass method at runtime."
+> * **Variables to watch**:
+>   * `shippingStrategy` (Polymorphic Field): Hover over this to see the runtime type (e.g. `SameDayShipping`).
+>   * **Step Into**: Step into the call and verify you land on the correct implementation (e.g., returning `30.0` for Same Day, `15.0` for Express, or `5.0` for Standard).
 
-4. **Step Into the Execution (Polymorphism)**:
-   - In the service class, stop at:
-     `double shippingFee = checkoutContext.executeShipping();`
-   - Click **Step Into** (**F7**). You will land on **Breakpoint 2** inside `CheckoutContext.java`:
-     `return shippingStrategy.calculateShippingFee();`
-   - **Crucial Explanation**: *Tell your lecturer: "Notice that this line calls `calculateShippingFee()` on the `ShippingStrategy` interface. The context doesn't hardcode any rates. It executes whichever strategy is set at runtime."*
+---
 
-5. **Step Into the Concrete Implementation**:
-   - With the cursor on `return shippingStrategy.calculateShippingFee();`, click **Step Into** (**F7**).
-   - The debugger will jump directly to **Breakpoint 3** inside [ExpressShipping.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/pattern/ExpressShipping.java):
-     `return 15.00;`
-   - *Tell your lecturer: "Since we selected Express Shipping in the UI, polymorphism dynamically routed this call to ExpressShipping. If we had selected Same-Day, it would have routed to SameDayShipping."*
+### 📌 Breakpoint 4: Pricing Strategy Selection (Regular vs. Promotional)
+* **File**: [CartWishlistService.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/CartWishlistService.java#L308-L310) or [CartWishlistService.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/CartWishlistService.java#L356-L357)
+* **Location**: Line 309 or Line 356 (inside `calculateCheckout`)
+* **Code Segment**:
+  ```java
+  PricingStrategy pricingStrategy = new PromotionalPricing(promo.getDiscountValue().doubleValue(), promo.getDiscountType());
+  // OR
+  PricingStrategy pricingStrategy = new RegularPricing();
+  ```
 
-6. **Complete the Execution**:
-   - Click the **Resume Program** button (green arrow, shortcut **F9**).
-   - The browser will resume and show you the **Order Confirmed** receipt page with the correct shipping fee break-down of `RM 15.00` and the final total!
+#### What to inspect and say:
+> **Explanation**: "This breakpoint verifies the selection of the pricing strategy based on promotion presence. If promotions exist, a `PromotionalPricing` strategy is instantiated with the discount details. If not, the context falls back to a `RegularPricing` strategy."
+> * **Variables to watch**:
+>   * `promotions` (List<Promotion>): Verify if any promotions were retrieved/applied.
+>   * `promo.getDiscountValue()`, `promo.getDiscountType()` (if promotional): Confirm the promo data matches the database parameters (e.g. `10.0` Fixed or `20.0` Percentage).
+>   * `pricingStrategy` (PricingStrategy): Confirm it instantiates the correct subclass.
+
+---
+
+### 📌 Breakpoint 5: Pricing Calculation Execution
+* **File**: [PromotionalPricing.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/strategy/PromotionalPricing.java#L15-L20)
+* **Location**: Lines 15–20 (inside `calculatePrice()`)
+* **Code Segment**:
+  ```java
+  double finalPrice = (discountType.equalsIgnoreCase("fixed") || discountType.equalsIgnoreCase("flat"))
+          ? basePrice - discountValue
+          : (100 - discountValue)/100 * basePrice;
+  return Math.max(finalPrice, 0);
+  ```
+
+#### What to inspect and say:
+> **Explanation**: "This breakpoint shows the calculation algorithm running inside the concrete strategy class. Step in to verify if the formula for a flat discount or percentage discount is correctly chosen based on `discountType`, and that the return value is clamped to at least zero to avoid negative pricing."
+> * **Variables to watch**:
+>   * `basePrice` (double): The initial subtotal eligible for the promotion.
+>   * `discountValue` (double): The discount multiplier or flat rate.
+>   * `discountType` (String): e.g. `"fixed"`, `"flat"`, or `"percentage"`.
+>   * `finalPrice` (double): Inspect this to confirm the mathematical correctness of the applied formula.
+
+---
+
+### 📌 Breakpoint 6: Checkout Result Assembly
+* **File**: [CartWishlistService.java](file:///c:/Users/saraf/Downloads/[CSE6234%20SOFT.%20DESIGN]/assignment/busana/src/main/java/com/busana/service/CartWishlistService.java#L361-L362)
+* **Location**: Line 361–362
+* **Code Segment**:
+  ```java
+  double totalAmount = discountedSubtotal + shippingFee;
+  return new CheckoutResult(subtotal, discountAmount, shippingFee, totalAmount);
+  ```
+
+#### What to inspect and say:
+> **Explanation**: "This final breakpoint confirms that the calculations from both the pricing strategy and shipping strategy are successfully integrated. We inspect the values inside the `CheckoutResult` record to verify the final sum is mathematically correct before returning it to the checkout view."
+> * **Variables to watch**:
+>   * `subtotal` (double): Original items total.
+>   * `discountAmount` (double): Total savings calculated from `PricingStrategy`.
+>   * `shippingFee` (double): Fee calculated from `ShippingStrategy`.
+>   * `totalAmount` (double): Expected final amount = (subtotal - discountAmount) + shippingFee.

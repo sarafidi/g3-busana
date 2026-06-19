@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 
 @Entity
-@Table(name = "admin")
+@Table(name = "Admin")
 public class Admin {
     @Id
     @Column(name = "adminID", length = 20, nullable = false)
