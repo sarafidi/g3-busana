@@ -295,71 +295,61 @@ public class CartWishlistService {
         checkoutContext.setShippingStrategy(shippingStrategy);
         double shippingFee = checkoutContext.executeShipping();
 
-        // 2. Select concrete Pricing Strategy and apply sequentially
-        double discountedSubtotal = subtotal;
+        // 2. Select concrete Pricing Strategy and apply in sequence
+        double discountedSubtotal;
         double discountAmount = 0.0;
 
         if (promotions != null && !promotions.isEmpty()) {
-            double[] itemPrices = new double[cartItems.size()];
-            for (int i = 0; i < cartItems.size(); i++) {
-                itemPrices[i] = cartItems.get(i).getSubtotal();
-            }
+            double[] itemPrices = cartItems.stream().mapToDouble(CartItem::getSubtotal).toArray();
 
             for (Promotion promo : promotions) {
-                PricingStrategy pricingStrategy = new PromotionalPricing(promo.getDiscountValue().doubleValue(), promo.getDiscountType());
-                checkoutContext.setPricingStrategy(pricingStrategy);
-
-                String applicableCategory = promo.getApplicableCategory();
-                if (applicableCategory != null && !applicableCategory.trim().isEmpty()) {
-                    double eligibleSubtotal = 0.0;
-                    for (int i = 0; i < cartItems.size(); i++) {
-                        Product product = cartItems.get(i).getVariant().getProduct();
-                        String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : "";
-                        if (categoryName.equalsIgnoreCase(applicableCategory.trim())) {
-                            eligibleSubtotal += itemPrices[i];
-                        }
-                    }
-
-                    if (eligibleSubtotal > 0) {
-                        double finalEligibleSubtotal = checkoutContext.executePrice(eligibleSubtotal);
-                        double factor = finalEligibleSubtotal / eligibleSubtotal;
-                        for (int i = 0; i < cartItems.size(); i++) {
-                            Product product = cartItems.get(i).getVariant().getProduct();
-                            String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : "";
-                            if (categoryName.equalsIgnoreCase(applicableCategory.trim())) {
-                                itemPrices[i] *= factor;
-                            }
-                        }
-                    }
-                } else {
-                    double currentTotal = 0.0;
-                    for (double price : itemPrices) {
-                        currentTotal += price;
-                    }
-                    if (currentTotal > 0) {
-                        double finalTotal = checkoutContext.executePrice(currentTotal);
-                        double factor = finalTotal / currentTotal;
-                        for (int i = 0; i < itemPrices.length; i++) {
-                            itemPrices[i] *= factor;
-                        }
-                    }
-                }
+                applyPromotion(itemPrices, cartItems, promo);
             }
 
-            double finalSum = 0.0;
-            for (double price : itemPrices) {
-                finalSum += price;
-            }
-            discountedSubtotal = finalSum;
+            discountedSubtotal = java.util.Arrays.stream(itemPrices).sum();
             discountAmount = subtotal - discountedSubtotal;
         } else {
-            PricingStrategy pricingStrategy = new RegularPricing();
-            checkoutContext.setPricingStrategy(pricingStrategy);
+            checkoutContext.setPricingStrategy(new RegularPricing());
             discountedSubtotal = checkoutContext.executePrice(subtotal);
         }
 
         double totalAmount = discountedSubtotal + shippingFee;
         return new CheckoutResult(subtotal, discountAmount, shippingFee, totalAmount);
+    }
+
+    private void applyPromotion(double[] itemPrices, List<CartItem> cartItems, Promotion promo) {
+        PricingStrategy pricingStrategy = new PromotionalPricing(promo.getDiscountValue().doubleValue(), promo.getDiscountType());
+        checkoutContext.setPricingStrategy(pricingStrategy);
+
+        String applicableCategory = promo.getApplicableCategory();
+        boolean isCategorySpecific = applicableCategory != null && !applicableCategory.trim().isEmpty();
+
+        // 1. Calculate eligible subtotal
+        double eligibleSubtotal = 0.0;
+        for (int i = 0; i < cartItems.size(); i++) {
+            if (!isCategorySpecific || isItemInCategory(cartItems.get(i), applicableCategory)) {
+                eligibleSubtotal += itemPrices[i];
+            }
+        }
+
+        if (eligibleSubtotal <= 0) return;
+
+        // 2. Apply strategy and calculate reduction factor
+        double finalEligibleSubtotal = checkoutContext.executePrice(eligibleSubtotal);
+        double factor = finalEligibleSubtotal / eligibleSubtotal;
+
+        // 3. Proportional scale-down of prices
+        for (int i = 0; i < cartItems.size(); i++) {
+            if (!isCategorySpecific || isItemInCategory(cartItems.get(i), applicableCategory)) {
+                itemPrices[i] *= factor;
+            }
+        }
+    }
+
+    private boolean isItemInCategory(CartItem item, String category) {
+        Product product = item.getVariant().getProduct();
+        String categoryName = product.getCategory() != null ? product.getCategory().getCategoryName() : "";
+        return categoryName.equalsIgnoreCase(category.trim());
     }
 
     public record CheckoutResult(double subtotal, double discountAmount, double shippingFee, double totalAmount) {}
