@@ -1,4 +1,4 @@
-package com.busana.service.strategy;
+package com.busana.service.strategy.promotions;
 
 public class PromotionalPricing implements PricingStrategy {
     private double discountValue;

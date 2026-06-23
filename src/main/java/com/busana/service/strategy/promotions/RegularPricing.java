@@ -1,4 +1,4 @@
-package com.busana.service.strategy;
+package com.busana.service.strategy.promotions;
 
 public class RegularPricing implements PricingStrategy{
     @Override

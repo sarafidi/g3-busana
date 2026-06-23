@@ -1,5 +1,7 @@
 package com.busana.service.strategy;
 
+import com.busana.service.strategy.promotions.PricingStrategy;
+import com.busana.service.strategy.shippings.ShippingStrategy;
 import org.springframework.stereotype.Service;
 
 @Service

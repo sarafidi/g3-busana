@@ -3,12 +3,18 @@ package com.busana.service;
 import com.busana.model.*;
 import com.busana.repository.*;
 import com.busana.service.strategy.*;
+import com.busana.service.strategy.promotions.PricingStrategy;
+import com.busana.service.strategy.promotions.PromotionalPricing;
+import com.busana.service.strategy.promotions.RegularPricing;
+import com.busana.service.strategy.shippings.ExpressShipping;
+import com.busana.service.strategy.shippings.SameDayShipping;
+import com.busana.service.strategy.shippings.ShippingStrategy;
+import com.busana.service.strategy.shippings.StandardShipping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.ArrayList;
 
 @Service
 public class CartWishlistService {
@@ -272,18 +278,20 @@ public class CartWishlistService {
         cartItemRepository.deleteAll(cartItems);
     }
 
+    // no promotion
     public CheckoutResult calculateCheckout(List<CartItem> cartItems, String shippingMethod) {
         return calculateCheckout(cartItems, shippingMethod, List.of());
     }
 
+    // 1 promotion
     public CheckoutResult calculateCheckout(List<CartItem> cartItems, String shippingMethod, Promotion promotion) {
         return calculateCheckout(cartItems, shippingMethod, promotion != null ? List.of(promotion) : List.of());
     }
 
+    // multiple promotion
     public CheckoutResult calculateCheckout(List<CartItem> cartItems, String shippingMethod, List<Promotion> promotions) {
         double subtotal = cartItems.stream().mapToDouble(CartItem::getSubtotal).sum();
 
-        // 1. Select concrete Shipping Strategy
         ShippingStrategy shippingStrategy;
         if ("express".equalsIgnoreCase(shippingMethod)) {
             shippingStrategy = new ExpressShipping();
@@ -295,7 +303,6 @@ public class CartWishlistService {
         checkoutContext.setShippingStrategy(shippingStrategy);
         double shippingFee = checkoutContext.executeShipping();
 
-        // 2. Select concrete Pricing Strategy and apply in sequence
         double discountedSubtotal;
         double discountAmount = 0.0;
 
@@ -321,10 +328,11 @@ public class CartWishlistService {
         PricingStrategy pricingStrategy = new PromotionalPricing(promo.getDiscountValue().doubleValue(), promo.getDiscountType());
         checkoutContext.setPricingStrategy(pricingStrategy);
 
+        // get applicable category of the promotion
         String applicableCategory = promo.getApplicableCategory();
         boolean isCategorySpecific = applicableCategory != null && !applicableCategory.trim().isEmpty();
 
-        // 1. Calculate eligible subtotal
+        // calculate eligible subtotal
         double eligibleSubtotal = 0.0;
         for (int i = 0; i < cartItems.size(); i++) {
             if (!isCategorySpecific || isItemInCategory(cartItems.get(i), applicableCategory)) {
@@ -334,11 +342,11 @@ public class CartWishlistService {
 
         if (eligibleSubtotal <= 0) return;
 
-        // 2. Apply strategy and calculate reduction factor
+        // apply strategy and calculate reduction factor
         double finalEligibleSubtotal = checkoutContext.executePrice(eligibleSubtotal);
         double factor = finalEligibleSubtotal / eligibleSubtotal;
 
-        // 3. Proportional scale-down of prices
+        // proportional scale-down of prices
         for (int i = 0; i < cartItems.size(); i++) {
             if (!isCategorySpecific || isItemInCategory(cartItems.get(i), applicableCategory)) {
                 itemPrices[i] *= factor;

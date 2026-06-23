@@ -1,4 +1,4 @@
-package com.busana.service.strategy;
+package com.busana.service.strategy.shippings;
 
 public class StandardShipping implements ShippingStrategy {
     @Override
